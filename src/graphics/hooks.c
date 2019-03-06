@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "types.h"
+#include "exec.hpp"
+#include "debug.h"
 #include "graphics.h"
 
 extern View view;
@@ -12,13 +10,12 @@ extern Laser laser;
 // Hook Callback Definitions ---------------------------------------------------
 
 void glut_hook_default__draw_2d() {
-    map_player_pos();
-    map_human_pos();
-    if (laser.active){
-        map_laser();
-    }
-    map_outline();
-    map_terrain();
+    // note: layers overlay in the reverse order
+    if (laser.active) map_laser_layer();  // e.g. laser is drawn above terrain
+    map_npc_layer();  // same with npcs, etc...
+    map_player_layer();
+    map_outline_layer();
+    map_terrain_layer();
 }
 
 void glut_hook_default__idle_update() {
@@ -28,40 +25,43 @@ void glut_hook_default__idle_update() {
     // calculate time delta
     int time = glutGet(GLUT_ELAPSED_TIME);
     frame++;
-    bool next_tick = time - timer_base > 1000;
+    bool next_tick = time - timer_base > 250;
     // log profiling information
     if (next_tick && config.show_fps) {
-        printf("FPS:%4.2f\n", frame * 1000.0 / (time - timer_base));
+        printf("FPS: %4.2f\n", frame * 250.0f / (time - timer_base));
     }
     // reset laser cooldown
     bool laser_cooldown = time - laser_base > 350;
-    if (!laser.active){
+    if (!laser.active) {
         laser_base = time;
-    } else if (laser_cooldown){
-        laser.active=false;
+    } else if (laser_cooldown) {
+        laser.active = false;
         laser_base = time;
     }
     // apply player movement
-    calc_player_move(COAST);
+    calc_player_move(DIRECTION_COAST);
     if (!next_tick) return;
     // reset time base
     timer_base = time;
     frame = 0;
-    // apply unit movement
-    Unit *unit = unit_first();
-    while (unit != NULL) {
-        calc_unit_move(unit);
-        unit = unit_next();
-    }
+    // trigger unit movement
+    unit_update_all();
 }
 
 void glut_hook_default__keyboard(unsigned char key, int x, int y) {
-    Direction direction = COAST;
+    Direction direction = DIRECTION_COAST;
     switch (key) {
         case 'q':
         case 27:
-            puts("exiting.");
+        log("exiting");
+            unit_rm_all();
+#ifdef __APPLE__
+            glutDestroyWindow(glutGetWindow());
             exit(0);
+#else
+            glutLeaveMainLoop();
+            break;
+#endif
         case 'f':
             config.fly_control = !config.fly_control;
             printf(
@@ -69,16 +69,16 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
             );
             break;
         case 'w':
-            direction = FORWARDS;
+            direction = DIRECTION_FORWARD;
             break;
         case 's':
-            direction = BACKWARDS;
+            direction = DIRECTION_BACK;
             break;
         case 'a':
-            direction = STRAFE_LEFT;
+            direction = DIRECTION_LEFT;
             break;
         case 'd':
-            direction = STRAFE_RIGHT;
+            direction = DIRECTION_RIGHT;
             break;
         case 'm':
             map_mode_toggle();
@@ -89,26 +89,31 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
         default:
             break;
     }
-    calc_player_move(direction);
+    calc_player_move(direction); // applies drifting
 }
 
 void glut_hook_default__motion(int x, int y) {
+    // render camera position
+    view.cam_x += y - view.old_y;
+    view.cam_y += x - view.old_x;
     view.old_x = x;
     view.old_y = y;
 }
 
 void glut_hook_default__mouse(int button, int state, int x, int y) {
-    laser.active=true;  // spec says to use mouse
+    if (button != 0 || state != 0) return;
+    laser.active = true;  // spec says to use mouse so that's used too
 }
 
 void glut_hook_default__passive_motion(int x, int y) {
-    view.cam_x += (float) y - view.old_y;
-    view.cam_y += (float) x - view.old_x;
+    // render camera position
+    view.cam_x += y - view.old_y;
+    view.cam_y += x - view.old_x;
     view.old_x = x;
     view.old_y = y;
-    glutPostRedisplay();
-    if(laser.active && laser_collision_check()){
-        puts("hit human!");
+    // check for laser collisions
+    if (laser.active && has_laser_collided()) {
+        log("hit human!");
     }
 }
 

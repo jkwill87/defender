@@ -1,11 +1,16 @@
 # Project Configuration --------------------------------------------------------
 
 CMAKE_MINIMUM_REQUIRED (VERSION 3.6)
-PROJECT (A2)
-SET (CMAKE_C_FLAGS "-std=c99")
-#SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
-SET (CMAKE_BUILD_TYPE Debug)
 
+PROJECT (a3)
+SET (CMAKE_C_STANDARD 99)
+SET (CMAKE_CXX_STANDARD 11)
+
+SET (CMAKE_C_FLAGS_DEBUG "-O0 -g -Wall -pedantic -fsanitize=address -fno-omit-frame-pointer")
+SET (CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -pedantic -fsanitize=address -fno-omit-frame-pointer")
+
+SET (CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+SET (CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
 # Graphics Library Configuration -----------------------------------------------
 
@@ -20,50 +25,23 @@ ADD_COMPILE_DEFINITIONS (GL_SILENCE_DEPRECATION)
 INCLUDE_DIRECTORIES (include)
 LINK_LIBRARIES (${GLUT_LIBRARY} ${OPENGL_LIBRARY} m)
 
-ADD_EXECUTABLE (a2
-    include/definitions.h
+ADD_EXECUTABLE (a3
     include/debug.h
+    include/definitions.h
+    include/exec.hpp
     include/graphics.h
     include/types.h
-    include/world.h
-    src/exec/init.c
-    src/exec/main.c
+    include/units.hpp
+    src/exec/units-wrapper.cpp
+    src/exec/global.c
+    src/exec/main.cpp
     src/graphics/engine.c
+    src/graphics/hooks.c
     src/graphics/map.c
     src/graphics/materials.c
-    src/world/pgm.c
-    src/world/units.c
-    src/graphics/hooks.c
-    )
-
-ADD_EXECUTABLE (test_pgm
-    include/definitions.h
-    include/debug.h
-    include/graphics.h
-    include/types.h
-    include/world.h
-    src/exec/init.c
-    src/graphics/engine.c
-    src/graphics/materials.c
-    src/graphics/map.c
-    src/world/pgm.c
-    src/world/units.c
-    tests/test_pgm.c
-    src/graphics/hooks.c
-    )
-
-ADD_EXECUTABLE (test_terrain
-    include/definitions.h
-    include/debug.h
-    include/graphics.h
-    include/types.h
-    include/world.h
-    src/exec/init.c
-    src/graphics/engine.c
-    src/graphics/map.c
-    src/graphics/materials.c
-    src/world/pgm.c
-    src/world/units.c
-    tests/test_terrain.c
-    src/graphics/hooks.c
+    src/graphics/movement.c
+    src/graphics/pgm.c
+    src/units/_unit.cpp
+    src/units/human.cpp
+    src/units/lander.cpp
     )

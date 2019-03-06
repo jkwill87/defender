@@ -1,61 +1,46 @@
 #pragma once
 
 #include <stdbool.h>
-
+#include <inttypes.h>
 #include "definitions.h"
 
 
-// Value Type Definitions ------------------------------------------------------
+// Type Declarations -----------------------------------------------------------
 
-typedef unsigned char byte;
+typedef uint_fast8_t byte;
+typedef byte World[WORLD_XZ][WORLD_Y][WORLD_XZ];
+typedef float Material[4];
 
 
-// Enum Type Definitions -------------------------------------------------------
-
-typedef enum direction {
-    COAST = 0,
-    FORWARDS,
-    BACKWARDS,
-    STRAFE_LEFT,
-    STRAFE_RIGHT
-} Direction;
+// Type Definitions ------------------------------------------------------------
 
 typedef enum colour {
-    // shades
-    TRANSPARENT = 0,
-    BLACK,
-    DARK,
-    MEDIUM,
-    LIGHT,
-    WHITE,
-    // colours
-    BLUE,
-    GREEN,
-    RED,
-    YELLOW,
-    ORANGE
+    COLOUR_NONE = 0,
+    COLOUR_WHITE,
+    COLOUR_GREY,
+    COLOUR_GREY2,
+    COLOUR_GREY3,
+    COLOUR_BLACK,
+    COLOUR_BLUE,
+    COLOUR_GREEN,
+    COLOUR_ORANGE,
+    COLOUR_RED,
+    COLOUR_YELLOW
 } Colour;
 
-typedef enum entity {
-    HUMAN,
-    UFO
-} Entity;
+typedef enum direction {
+    DIRECTION_COAST = 0,
+    DIRECTION_FORWARD,
+    DIRECTION_BACK,
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT
+} Direction;
 
 typedef enum map_mode {
-    HIDDEN = 0,
-    MINI = 1,
-    FULL = 2
+    MAP_HIDDEN = 0,
+    MAP_MINI,
+    MAP_FULL
 } MapMode;
-
-
-// Struct Type Definitions -----------------------------------------------------
-
-typedef struct pgm {
-    unsigned x;
-    unsigned y;
-    unsigned z;
-    unsigned data[PGM_MAX_DIM * PGM_MAX_DIM];
-} Pgm;
 
 typedef struct config {
     bool display_all_cubes;
@@ -63,18 +48,10 @@ typedef struct config {
     bool full_screen;
     bool show_fps;
     bool test_world;
-    int screen_width;
     int screen_height;
-    MapMode map_mode;
+    int screen_width;
+    enum map_mode map_mode;
 } Config;
-
-typedef struct view {
-    int count;
-    float cam_x;
-    float cam_y;
-    float old_x;
-    float old_y;
-} View;
 
 typedef struct position {
     float x;
@@ -82,17 +59,11 @@ typedef struct position {
     float z;
 } Position;
 
-typedef struct point {
+typedef struct coordinate {
     int x;
     int y;
-} Point;
-
-typedef struct unit {
-    enum entity entity;
-    enum colour block[3][3][3];
-    struct position position;
-    unsigned durability;
-} Unit;
+    int z;
+} Coordinate;
 
 typedef struct glut_hooks {
     void (*display)();
@@ -107,10 +78,21 @@ typedef struct glut_hooks {
 
 typedef struct laser {
     bool active;
-    Position from;
-    Position to;
-}Laser;
+    struct position from;
+    struct position to;
+} Laser;
 
-typedef float Material[4];
+typedef struct pgm {
+    int x;
+    int y;
+    int z;
+    unsigned long data[PGM_MAX_DIM * PGM_MAX_DIM];
+} Pgm;
 
-typedef byte World[WORLD_XZ][WORLD_Y][WORLD_XZ];
+typedef struct view {
+    int count;
+    int cam_x;
+    int cam_y;
+    int old_x;
+    int old_y;
+} View;

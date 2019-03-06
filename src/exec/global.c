@@ -9,27 +9,29 @@
 
 // Default Global State Definitions --------------------------------------------
 
-Pgm terrain = {.x=0, .y=0, .z=0, .data={0}};
-
-World world;
-
-View view = {
-    .cam_x = 360, .cam_y = 450, .old_x = 0, .old_y = 0, .count = 0
-};
-
-Position player_pos = {
-    .x = -20, .y = -25, .z = -45
-};
-
 Config config = {
     .display_all_cubes = false,
     .fly_control = false,
     .full_screen = false,
+    .map_mode = MAP_MINI,
+    .screen_height = 720,
+    .screen_width = 1280,
     .show_fps = false,
     .test_world = false,
-    .screen_width = 1280,
-    .screen_height = 720,
-    .map_mode = MINI
+};
+
+Laser laser = {
+    .active=false,
+    .from={0},
+    .to={0}
+};
+
+Pgm terrain = {
+    .x=0, .y=0, .z=0, .data={0}
+};
+
+Position player_pos = {
+    .x = -20, .y = -25, .z = -45
 };
 
 GlutHooks glut_hooks = {
@@ -43,8 +45,9 @@ GlutHooks glut_hooks = {
     .reshape=glut_hook_default__reshape
 };
 
-Laser laser = {
-    .active=false,
-    .from={0},
-    .to={0}
+View view = {
+    .cam_x = 360, .cam_y = 450, .old_x = 0, .old_y = 0, .count = 0
 };
+
+World world_terrain = {{{COLOUR_NONE}}};
+World world_units = {{{COLOUR_NONE}}};

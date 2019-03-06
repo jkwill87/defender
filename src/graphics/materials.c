@@ -2,45 +2,44 @@
 
 #define _m(m, r, b, g, a) m[0]=r;m[1]=b;m[2]=g;m[3]=a
 
-const Material *get_material(Colour colour) {
+Material *get_material(Colour colour) {
     return get_material_a(colour, 1.0f);
 }
 
-const Material *get_material_a(Colour colour, float alpha) {
+Material *get_material_a(Colour colour, float alpha) {
     static Material material;
     switch (colour) {
         default:
-        case RED:
+        case COLOUR_RED:
         _m(material, 0.5f, 0.0f, 0.0f, alpha);
             break;
-        case BLUE:
+        case COLOUR_BLUE:
         _m(material, 0.0f, 0.0f, 0.5f, alpha);
             break;
-        case GREEN:
+        case COLOUR_GREEN:
         _m(material, 0.0f, 0.5f, 0.0f, alpha);
             break;
-        case YELLOW:
+        case COLOUR_YELLOW:
         _m(material, 0.75f, 0.75f, 0.0f, alpha);
             break;
-        case ORANGE:
+        case COLOUR_ORANGE:
         _m(material, 0.5f, 0.32f, 0.0f, alpha);
             break;
-        case BLACK:
+        case COLOUR_BLACK:
         _m(material, 0.0f, 0.0f, 0.0f, alpha);
             break;
-        case DARK:
+        case COLOUR_GREY3:
         _m(material, 0.125f, 0.125f, 0.125f, alpha);
             break;
-        case MEDIUM:
+        case COLOUR_GREY2:
         _m(material, 0.5f, 0.5f, 0.5f, alpha);
             break;
-        case LIGHT:
+        case COLOUR_GREY:
         _m(material, 0.7f, 0.7f, 0.7f, alpha);
             break;
-        case WHITE:
+        case COLOUR_WHITE:
         _m(material, 1.0f, 1.0f, 1.0f, alpha);
             break;
     }
     return &material;
 }
-

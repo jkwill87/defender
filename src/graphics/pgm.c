@@ -1,10 +1,7 @@
 #include <ctype.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
+
 #include "debug.h"
-#include "world.h"
 
 #define _PATH_BUFFER 100
 
@@ -12,7 +9,7 @@
 // External Variables ----------------------------------------------------------
 
 extern Pgm terrain;
-extern World world;
+extern World world_terrain;
 
 
 // Module globals --------------------------------------------------------------
@@ -48,8 +45,9 @@ static char *_load_file(const char *filename) {
     char *buffer = current_char = calloc(end_position, sizeof(char));
     if (buffer) {
         fseek(file_handle, 0, SEEK_SET);
+        size_t read_status = fread(buffer, 1, end_position, file_handle);
         assert_ok(
-            fread(buffer, 1, end_position, file_handle) != 0,
+            read_status != 0,
             "could not read pgm data"
         );
         last_char = buffer + end_position;
@@ -84,7 +82,7 @@ static unsigned _get_next_number(unsigned max) {
         if (!isdigit(c)) break;
         n[i] = c;
     }
-    long rval = atol(n);          // NOLINT(cert-err34-c)
+    long rval = atol(n);
     assert_ok(c, "no number to parse");
     assert_ok(!isdigit(c), "parsed value exceeds PGM_MAX_DIGITS");
     assert_ok(rval >= 0, "value could not be parsed");
@@ -97,37 +95,40 @@ static void _clear_terrain() {
     for (byte x = 0; x < WORLD_XZ; x++)
         for (byte y = 0; y < WORLD_Y; y++)
             for (byte z = 0; z < WORLD_XZ; z++)
-                world[x][y][z] = 0;
+                world_terrain[x][y][z] = 0;
 }
 
 static bool _is_floating_block(byte x, byte y, byte z) {
     byte pts = 0;
     // block directly below
-    if (world[x][y - 1][z]) pts += 4;
-    // if (world[x][y - 2][z]) pts += 2;
+    if (world_terrain[x][y - 1][z]) pts += 4;
     // blocks below
-    if (y - 1 >= 0 && world[x][y - 1][z])
+    if (y - 1 >= 0 && world_terrain[x][y - 1][z])
         pts += 3;
-    else if (y - 2 >= 0 && world[x][y - 2][z])
+    else if (y - 2 >= 0 && world_terrain[x][y - 2][z])
         pts += 2;
-    else if (y - 3 >= 0 && world[x][y - 3][z])
+    else if (y - 3 >= 0 && world_terrain[x][y - 3][z])
         pts += 1;
     // blocks underneath and offset
-    if (x - 1 >= 0 && world[x - 1][y - 1][z]) pts += 4;
-    if (x + 1 < WORLD_XZ && world[x + 1][y - 1][z]) pts += 4;
-    if (z - 1 >= 0 && world[x][y - 1][z - 1]) pts += 4;
-    if (z + 1 < WORLD_XZ && world[x][y - 1][z + 1]) pts += 4;
+    if (x - 1 >= 0 && world_terrain[x - 1][y - 1][z]) pts += 4;
+    if (x + 1 < WORLD_XZ && world_terrain[x + 1][y - 1][z]) pts += 4;
+    if (z - 1 >= 0 && world_terrain[x][y - 1][z - 1]) pts += 4;
+    if (z + 1 < WORLD_XZ && world_terrain[x][y - 1][z + 1]) pts += 4;
     // blocks underneath diagonally
-    if (x - 1 >= 0 && z - 1 >= 0 && world[x - 1][y - 1][z - 1]) pts += 3;
-    if (x - 1 >= 0 && z + 1 < WORLD_XZ && world[x - 1][y - 1][z + 1]) pts += 3;
-    if (x + 1 < WORLD_XZ && z + 1 < WORLD_XZ && world[x + 1][y - 1][z + 1])
+    if (x - 1 >= 0 && z - 1 >= 0 && world_terrain[x - 1][y - 1][z - 1])
         pts += 3;
-    if (x + 1 < WORLD_XZ && z - 1 >= 0 && world[x + 1][y - 1][z - 1]) pts += 3;
+    if (x - 1 >= 0 && z + 1 < WORLD_XZ && world_terrain[x - 1][y - 1][z + 1])
+        pts += 3;
+    if (x + 1 < WORLD_XZ && z + 1 < WORLD_XZ &&
+        world_terrain[x + 1][y - 1][z + 1])
+        pts += 3;
+    if (x + 1 < WORLD_XZ && z - 1 >= 0 && world_terrain[x + 1][y - 1][z - 1])
+        pts += 3;
     // blocks adjacent to
-    if ((x - 1 > 0 && world[x - 1][y][z]) ||
-        (z - 1 > 0 && world[x][y][z - 1]) ||
-        (z + 1 < WORLD_XZ && world[x][y][z + 1]) ||
-        (x + 1 < WORLD_XZ && world[x + 1][y][z]))
+    if ((x - 1 > 0 && world_terrain[x - 1][y][z]) ||
+        (z - 1 > 0 && world_terrain[x][y][z - 1]) ||
+        (z + 1 < WORLD_XZ && world_terrain[x][y][z + 1]) ||
+        (x + 1 < WORLD_XZ && world_terrain[x + 1][y][z]))
         pts += 1;
     return pts < 4;
 }
@@ -140,10 +141,10 @@ static void _settle_cubes() {
         for (byte x = 0; x < WORLD_XZ; x++) {
             for (byte y = WORLD_Y - 1; y > 1; y--) {
                 for (byte z = 0; z < WORLD_XZ; z++) {
-                    if (world[x][y][z] == 0) continue;
+                    if (world_terrain[x][y][z] == 0) continue;
                     if (!_is_floating_block(x, y, z)) continue;
-                    world[x][y][z] = TRANSPARENT;
-                    world[x][y - 1][z] = MEDIUM;
+                    world_terrain[x][y][z] = COLOUR_NONE;
+                    world_terrain[x][y - 1][z] = COLOUR_BLACK;
                     retry = true;
                 }
             }
@@ -155,7 +156,7 @@ static void _add_base_layer() {
     // add plane of cubes along bottom border
     for (int x = 0; x < WORLD_XZ; x++) {
         for (int z = 0; z < WORLD_XZ; z++) {
-            world[x][0][z] = MEDIUM;
+            world_terrain[x][0][z] = COLOUR_BLACK;
         }
     }
 }
@@ -167,12 +168,12 @@ static void _cull_overlapping_cubes() {
         for (int z = 0; z < WORLD_XZ; z++) {
             ceil = false;
             for (int y = WORLD_Y - 1; y >= 0; y--) {
-                if (world[x][y][z] != MEDIUM)
+                if (world_terrain[x][y][z] != COLOUR_BLACK)
                     continue;
                 else if (!ceil)
                     ceil = true;
                 else
-                    world[x][y][z] = TRANSPARENT;
+                    world_terrain[x][y][z] = COLOUR_NONE;
             }
         }
     }
@@ -181,7 +182,7 @@ static void _cull_overlapping_cubes() {
 
 // Public Function Definitions -------------------------------------------------
 
-void pgm_init(char *filename) {
+void pgm_init(const char *filename) {
     // load file
     char *buffer = _load_file(filename);
     assert_ok(buffer, "no data loaded from file");
@@ -205,23 +206,24 @@ void pgm_init(char *filename) {
     free(buffer);
 }
 
-unsigned pgm_get_y_value(unsigned x, unsigned z) {
-    unsigned i = z * terrain.z + x;
-    assert_ok(x < terrain.x, "x value out of range");
-    assert_ok(z < terrain.z, "z value out of range");
-    assert_ok(i < terrain.x * terrain.z, "index out of range");
-    return terrain.data[i];
+unsigned pgm_get_y_value(double x, double z) {
+    int i = (int) (z * terrain.z + x);
+    assert_lt(x, terrain.x, "x value out of range");
+    assert_lt(z, terrain.z, "z value out of range");
+    assert_lt(i, terrain.x * terrain.z, "index out of range");
+    return (unsigned) terrain.data[i];
 }
 
 unsigned pgm_calc_ceil() {
-    unsigned real_max = 0;
-    // determine highest point in data
+    float ceil = 0;
     for (int i = 0; i < terrain.x * terrain.z; i++) {
-        if (terrain.data[i] > real_max) {
-            real_max = terrain.data[i];
+        if (terrain.data[i] > ceil) {
+            ceil = terrain.data[i];
         }
     }
-    return (unsigned int) (real_max + real_max * 0.1f);
+    ceil += ceil * 0.1f;
+    assert_gte(ceil, 0.0f, "ceil underflow imminent");
+    return (unsigned) ceil;
 }
 
 void pgm_set_world_terrain() {
@@ -230,18 +232,25 @@ void pgm_set_world_terrain() {
     double x_scale = (terrain.x - 1) / (WORLD_XZ - 1.0);
     double y_scale = (y_max - 1) / (WORLD_Y - 1.0);
     double z_scale = (terrain.z - 1) / (WORLD_XZ - 1.0);
-    unsigned sx, sy, sz;
+    double sx, sy, sz;
+    byte y;
     // nearest neighbour interpolation
-    for (int x = 0; x < WORLD_XZ; x++) {
-        for (int z = 0; z < WORLD_XZ; z++) {
-            sx = (unsigned) (x * x_scale);
-            sz = (unsigned) (z * z_scale);
-            sy = (unsigned) floor(pgm_get_y_value(sx, sz) / y_scale);
-            assert_ok(sy <= WORLD_Y, "y value out of range");
-            world[x][sy][z] = MEDIUM;
+    for (byte x = 0; x < WORLD_XZ; x++) {
+        for (byte z = 0; z < WORLD_XZ; z++) {
+            sx = x * x_scale;
+            assert_gte(sx, 0.0f, "sx value out of range");
+            assert_lt(sx, terrain.x, "sx value out of range");
+            sz = z * z_scale;
+            assert_gte(sz, 0.0f, "sz value out of range");
+            assert_lt(sz, terrain.z, "sz value out of range");
+            sy = pgm_get_y_value(sx, sz) / y_scale;
+            assert_gte(sy, 0.0f, "sy value out of range");
+            assert_lt(sy, WORLD_Y, "sy value out of range");
+            y = (byte) sy;
+            world_terrain[x][y][z] = COLOUR_BLACK;
         }
     }
-    // normalize world
+    // normalize units
     _settle_cubes();
     _cull_overlapping_cubes();
     _add_base_layer();

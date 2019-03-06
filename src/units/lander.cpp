@@ -58,7 +58,7 @@ void Lander::ai_pursue() {
 void Lander::ai_capture() {
     assert_ok(target, "no target to capture");
     const int target_distance = y_distance(target);
-    if (target_distance < 3) {
+    if (target_distance < 6) {
         state = ESCAPING;
     } else if (!target_distance) {
         target = nullptr;

@@ -40,9 +40,9 @@ class Unit {
     // Method Declarations  ----------------------------------------------------
 
     protected:
-    bool is_over(const Unit *target);
-    bool is_intersecting(const Unit *target);
+    int y_distance(const Unit *target);
     void move_towards(const Unit *target);
+    void remove();
 
     public:
     virtual void action_hit() = 0;
@@ -108,6 +108,7 @@ class Lander : public Unit {
         SEARCHING,
         PURSUING,
         CAPTURING,
+        ESCAPING,
         KILLED
     } State;
 
@@ -130,6 +131,7 @@ class Lander : public Unit {
     void ai_search();
     void ai_pursue();
     void ai_capture();
+    void ai_escape();
 
     public:
     void render() override;

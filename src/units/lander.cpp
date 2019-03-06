@@ -48,18 +48,33 @@ void Lander::ai_search() {
 void Lander::ai_pursue() {
     assert_ok(target, "no target to pursue");
     move_towards(target);
-    if (is_over(target)) {
+    if (y_distance(target)) {
         target->action_lift();
         state = CAPTURING;
+        log("%s capturing %s", as_str.c_str(), target->as_str.c_str());
     }
 }
 
 void Lander::ai_capture() {
     assert_ok(target, "no target to capture");
-    if (is_intersecting(target)) {
-        target->action_capture();
+    const int target_distance = y_distance(target);
+    if (target_distance < 3) {
+        state = ESCAPING;
+    } else if (!target_distance) {
         target = nullptr;
         state = SEARCHING;
+        log("%s escaping", as_str.c_str());
+    }
+}
+
+void Lander::ai_escape() {
+    assert_ok(target, "no target to escape with");
+    if (WORLD_Y - origin.y < 0) {
+        target->action_capture();
+        state = KILLED;
+        log("%s escaped", as_str.c_str());
+    } else {
+        ++origin.y;
     }
 }
 
@@ -77,8 +92,11 @@ void Lander::render() {
         case CAPTURING:
             ai_capture();
             break;
+        case ESCAPING:
+            ai_escape();
+            break;
         case KILLED:
-            delete this;
+            remove();
             break;
     }
     if (frame_a) {

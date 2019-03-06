@@ -203,6 +203,7 @@ void start_game(int *argc, char **argv) {
 }
 
 void glut_hook_default__display() {
+    glutPostRedisplay();
     view.count = 0;
     build_display_list();
     glClear(GL_DEPTH_BUFFER_BIT);

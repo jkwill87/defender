@@ -63,19 +63,26 @@ void Unit::render() {
     }
 }
 
-bool Unit::is_over(const Unit *target) {
-    return origin.x == target->origin.x && origin.z == target->origin.z;
+void Unit::remove() {
+    const auto vec_addr = std::find(units.begin(), units.end(), this);
+    units.erase(vec_addr);
 }
+
+int Unit::y_distance(const Unit *target) {
+    int distance = 0;
+    if (origin.x == target->origin.x && origin.z == target->origin.z &&
+        origin.y > target->origin.y) {
+        return origin.y - target->origin.y;
+    }
+    return distance;
+}
+
 
 void Unit::move_towards(const Unit *target) {
     if (origin.x - target->origin.x < 0) origin.x++;
     else if (origin.x - target->origin.x > 0) origin.x--;
     if (origin.z - target->origin.z < 0) origin.z++;
     else if (origin.z - target->origin.z > 0)origin.z--;
-}
-
-bool Unit::is_intersecting(const Unit *target) {
-    return abs(origin.y - target->origin.y) < 3;
 }
 
 bool Unit::is_occupying(Coordinate &pos) {

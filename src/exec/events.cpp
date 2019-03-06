@@ -35,8 +35,8 @@ static Coordinate gen_random_coord() {
 
 void unit_update_all() {
     memset(world_units, 0, WORLD_XZ * WORLD_XZ * WORLD_Y);  // clear units
-    for (Unit *unit : Unit::units) {
-        unit->render();
+    for (float i = Unit::units.size(); i > 0; i--) {
+        Unit::units[i - 1]->render();
     }
 }
 

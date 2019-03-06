@@ -32,7 +32,7 @@ ADD_EXECUTABLE (a3
     include/graphics.h
     include/types.h
     include/units.hpp
-    src/exec/units-wrapper.cpp
+    src/exec/events.cpp
     src/exec/global.c
     src/exec/main.cpp
     src/graphics/engine.c

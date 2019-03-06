@@ -25,10 +25,10 @@ void glut_hook_default__idle_update() {
     // calculate time delta
     int time = glutGet(GLUT_ELAPSED_TIME);
     frame++;
-    bool next_tick = time - timer_base > 250;
+    bool next_tick = time - timer_base > 100;
     // log profiling information
     if (next_tick && config.show_fps) {
-        printf("FPS: %4.2f\n", frame * 250.0f / (time - timer_base));
+        printf("FPS: %4.2f\n", frame * 1000.0f / (time - timer_base));
     }
     // reset laser cooldown
     bool laser_cooldown = time - laser_base > 350;
@@ -46,6 +46,7 @@ void glut_hook_default__idle_update() {
     frame = 0;
     // trigger unit movement
     unit_update_all();
+    glutPostRedisplay();
 }
 
 void glut_hook_default__keyboard(unsigned char key, int x, int y) {
@@ -56,8 +57,8 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
         log("exiting");
             unit_rm_all();
 #ifdef __APPLE__
-            glutDestroyWindow(glutGetWindow());
-            exit(0);
+        glutDestroyWindow(glutGetWindow());
+        exit(0);
 #else
             glutLeaveMainLoop();
             break;

@@ -72,7 +72,7 @@ void Human::render() {
             ai_floating();
             break;
         case KILLED:
-            delete this;
+            remove();
             return;
     }
     Unit::render();

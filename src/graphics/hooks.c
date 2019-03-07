@@ -57,11 +57,11 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
         log("exiting");
             unit_rm_all();
 #ifdef __APPLE__
-        glutDestroyWindow(glutGetWindow());
-        exit(0);
+            glutDestroyWindow(glutGetWindow());
+            exit(0);
 #else
-            glutLeaveMainLoop();
-            break;
+        glutLeaveMainLoop();
+        break;
 #endif
         case 'f':
             config.fly_control = !config.fly_control;

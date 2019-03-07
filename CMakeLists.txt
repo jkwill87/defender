@@ -35,6 +35,7 @@ ADD_EXECUTABLE (a3
     src/exec/events.cpp
     src/exec/global.c
     src/exec/main.cpp
+    src/exec/random.cpp
     src/graphics/engine.c
     src/graphics/hooks.c
     src/graphics/map.c

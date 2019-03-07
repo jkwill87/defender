@@ -43,7 +43,7 @@ void Human::ai_settled() {
 }
 
 void Human::ai_floating() {
-    ++origin.y;
+    animate_floating();
     assert_lte(origin.y - origin_offset, WORLD_Y, "out of bounds");
 }
 
@@ -55,6 +55,16 @@ void Human::ai_falling() {
         --origin.y;
         assert_gte(origin.y, 0, "out of bounds");
     }
+}
+
+void Human::animate_floating() {
+    Layout next_layout;
+    next_layout[{+0, -1, +0}] = layout[{+0, +0, +0}];
+    next_layout[{+0, +0, +0}] = layout[{+0, +1, +0}];
+    next_layout[{+0, +1, +0}] = layout[{+0, -1, +0}];
+    layout.swap(next_layout);
+    if (cycle % 2) return; // elevate once every n cycles
+    ++origin.y;
 }
 
 

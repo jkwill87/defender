@@ -19,6 +19,7 @@ vector<Unit *> Unit::units;
 
 Unit::Unit(int x, int y, int z, string name) :
     id(units.size()),
+    target({x, y, z}),
     origin({x, y, z}),
     as_str(name + " id:" + to_string(units.size())) {
     units.push_back(this);
@@ -61,6 +62,7 @@ void Unit::render() {
         Colour colour = mapping.second;
         world_units[x][y][z] = colour;
     }
+    ++cycle;
 }
 
 void Unit::remove() {
@@ -77,12 +79,15 @@ int Unit::y_distance(const Unit *target) {
     return distance;
 }
 
+bool Unit::is_at_target() {
+    return origin.x == target.z && origin.y == target.y && origin.z == target.z;
+}
 
-void Unit::move_towards(const Unit *target) {
-    if (origin.x - target->origin.x < 0) origin.x++;
-    else if (origin.x - target->origin.x > 0) origin.x--;
-    if (origin.z - target->origin.z < 0) origin.z++;
-    else if (origin.z - target->origin.z > 0)origin.z--;
+void Unit::move_to_target() {
+    if (origin.x - target.x < 0) origin.x++;
+    else if (origin.x - target.x > 0) origin.x--;
+    if (origin.z - target.z < 0) origin.z++;
+    else if (origin.z - target.z > 0)origin.z--;
 }
 
 bool Unit::is_occupying(Coordinate &pos) {

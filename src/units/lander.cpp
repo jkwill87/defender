@@ -1,6 +1,7 @@
 #include <sstream>
 
 #include <units.hpp>
+#include <exec.hpp>
 
 #include "debug.h"
 
@@ -31,51 +32,82 @@ Lander::Lander(Coordinate coordinate) :
 // Private Methods -------------------------------------------------------------
 
 void Lander::ai_search() {
-    // Attempt to find a human target
-    Human *human;
-    for (Unit *unit: Unit::units) {
-        human = dynamic_cast<Human *>(unit);
-        if (!human) continue;
-        if (!human->available) continue;
-        target = human;
-        human->available = false;
-        state = PURSUING;
-        log("%s targetted %s", as_str.c_str(), target->as_str.c_str());
-        break;
+    if (is_at_target()) {
+        // Set a new search position
+        target = gen_random_edge_coord();
+    } else if (!captive) {
+        // Attempt to find a human target
+        Human *human;
+        for (Unit *unit: Unit::units) {
+            human = dynamic_cast<Human *>(unit);
+            if (!human) continue;
+            if (!human->available) continue;
+            captive = human;
+            human->available = false;
+            state = PURSUING;
+            log("%s targetted %s", as_str.c_str(), captive->as_str.c_str());
+            break;
+        }
     }
 }
 
 void Lander::ai_pursue() {
-    assert_ok(target, "no target to pursue");
-    move_towards(target);
-    if (y_distance(target)) {
-        target->action_lift();
+    assert_ok(captive, "no target to pursue");
+    target = captive->origin;
+    move_to_target();
+    if (y_distance(captive)) {
+        captive->action_lift();
         state = CAPTURING;
-        log("%s capturing %s", as_str.c_str(), target->as_str.c_str());
+        log("%s capturing %s", as_str.c_str(), captive->as_str.c_str());
     }
 }
 
 void Lander::ai_capture() {
-    assert_ok(target, "no target to capture");
-    const int target_distance = y_distance(target);
-    if (target_distance < 6) {
+    assert_ok(captive, "no target to capture");
+    if (has_captive()) {
         state = ESCAPING;
-    } else if (!target_distance) {
-        target = nullptr;
+    } else if (!getting_captive()) {
+        captive = nullptr;
         state = SEARCHING;
         log("%s escaping", as_str.c_str());
     }
 }
 
 void Lander::ai_escape() {
-    assert_ok(target, "no target to escape with");
+    assert_ok(captive, "no target to escape with");
     if (WORLD_Y - origin.y < 0) {
-        target->action_capture();
+        captive->action_capture();
         state = KILLED;
         log("%s escaped", as_str.c_str());
-    } else {
+    } else if (has_captive()) {
         ++origin.y;
+    } else if (!getting_captive()) {
+        captive = nullptr;
+        state = SEARCHING;
+        log("%s escaping", as_str.c_str());
     }
+}
+
+void Lander::animate_rotation() {
+    if (cycle % 2) {
+        layout[{+0, +0, +1}] = COLOUR_GREEN;
+        layout[{+0, +0, -1}] = COLOUR_GREEN;
+        layout[{-1, +0, +0}] = COLOUR_YELLOW;
+        layout[{+1, +0, +0}] = COLOUR_YELLOW;
+    } else {
+        layout[{+0, +0, +1}] = COLOUR_YELLOW;
+        layout[{+0, +0, -1}] = COLOUR_YELLOW;
+        layout[{-1, +0, +0}] = COLOUR_GREEN;
+        layout[{+1, +0, +0}] = COLOUR_GREEN;
+    }
+}
+
+bool Lander::has_captive() {
+    return y_distance(captive) < 6;
+}
+
+bool Lander::getting_captive() {
+    return y_distance(captive) != 0;
 }
 
 
@@ -99,26 +131,15 @@ void Lander::render() {
             remove();
             break;
     }
-    if (frame_a) {
-        layout[{+0, +0, +1}] = COLOUR_GREEN;
-        layout[{+0, +0, -1}] = COLOUR_GREEN;
-        layout[{-1, +0, +0}] = COLOUR_YELLOW;
-        layout[{+1, +0, +0}] = COLOUR_YELLOW;
-    } else {
-        layout[{+0, +0, +1}] = COLOUR_YELLOW;
-        layout[{+0, +0, -1}] = COLOUR_YELLOW;
-        layout[{-1, +0, +0}] = COLOUR_GREEN;
-        layout[{+1, +0, +0}] = COLOUR_GREEN;
-    }
-    frame_a = !frame_a;
+    animate_rotation();
     Unit::render();
-
 }
+
 
 void Lander::action_hit() {
     log("%s shot down", as_str.c_str());
-    if (target) {
-        target->action_drop();
+    if (captive) {
+        captive->action_drop();
     }
     state = KILLED;
 }

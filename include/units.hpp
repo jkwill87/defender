@@ -23,7 +23,9 @@ class Unit {
     const long id;
 
     protected:
+    Coordinate target;
     Layout layout;
+    byte cycle = 0;
 
     public:
     Coordinate origin;
@@ -41,7 +43,8 @@ class Unit {
 
     protected:
     int y_distance(const Unit *target);
-    void move_towards(const Unit *target);
+    void move_to_target();
+    bool is_at_target();
     void remove();
 
     public:
@@ -87,6 +90,7 @@ class Human : public Unit {
     void ai_settled();
     void ai_floating();
     void ai_falling();
+    void animate_floating();
 
     public:
     void render() override;
@@ -116,8 +120,7 @@ class Lander : public Unit {
 
     private:
     State state = SEARCHING;
-    Human *target = nullptr;
-    bool frame_a = false;
+    Human *captive = nullptr;
 
     // Constructor Declarations ------------------------------------------------
 
@@ -132,6 +135,9 @@ class Lander : public Unit {
     void ai_pursue();
     void ai_capture();
     void ai_escape();
+    void animate_rotation();
+    bool has_captive();
+    bool getting_captive();
 
     public:
     void render() override;

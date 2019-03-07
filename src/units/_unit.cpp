@@ -54,6 +54,7 @@ Unit::~Unit() {
 // Method Definitions ----------------------------------------------------------
 
 void Unit::render() {
+    move_to_target();
     for (auto const &mapping : layout) {
         PositionArray positions = mapping.first;
         int x = origin.x + positions[0];
@@ -86,6 +87,8 @@ bool Unit::is_at_target() {
 void Unit::move_to_target() {
     if (origin.x - target.x < 0) origin.x++;
     else if (origin.x - target.x > 0) origin.x--;
+    if (origin.y - target.y < 0) origin.y++;
+    else if (origin.y - target.y > 0)origin.y--;
     if (origin.z - target.z < 0) origin.z++;
     else if (origin.z - target.z > 0)origin.z--;
 }

@@ -53,7 +53,8 @@ void Lander::ai_search() {
 
 void Lander::ai_pursue() {
     assert_ok(captive, "no target to pursue");
-    target = captive->origin;
+    target.x = captive->origin.x;
+    target.z = captive->origin.z;
     move_to_target();
     if (y_distance(captive)) {
         captive->action_lift();
@@ -80,7 +81,7 @@ void Lander::ai_escape() {
         state = KILLED;
         log("%s escaped", as_str.c_str());
     } else if (has_captive()) {
-        ++origin.y;
+        ++target.y;
     } else if (!getting_captive()) {
         captive = nullptr;
         state = SEARCHING;

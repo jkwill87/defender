@@ -27,7 +27,7 @@ Human::Human(int x, int y, int z) : Unit(x, y, z, "human") {
             break;
         }
     }
-    origin.y = terrain_height;
+    origin.y=target.y = terrain_height;
 }
 
 Human::Human(Coordinate coordinate) :
@@ -44,7 +44,8 @@ void Human::ai_settled() {
 
 void Human::ai_floating() {
     animate_floating();
-    assert_lte(origin.y - origin_offset, WORLD_Y, "out of bounds");
+    ++target.y;
+    assert_lte(target.y - origin_offset, WORLD_Y, "out of bounds");
 }
 
 void Human::ai_falling() {
@@ -52,7 +53,7 @@ void Human::ai_falling() {
         state = SETTLED;
     } else {
         ++fall_height;
-        --origin.y;
+        --target.y;
         assert_gte(origin.y, 0, "out of bounds");
     }
 }
@@ -64,7 +65,6 @@ void Human::animate_floating() {
     next_layout[{+0, +1, +0}] = layout[{+0, -1, +0}];
     layout.swap(next_layout);
     if (cycle % 2) return; // elevate once every n cycles
-    ++origin.y;
 }
 
 

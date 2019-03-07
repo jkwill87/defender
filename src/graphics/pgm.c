@@ -92,6 +92,7 @@ static unsigned _get_next_number(unsigned max) {
 
 static void _clear_terrain() {
     // clearout any existing cubes
+    #pragma omp parallel for collapse(3)
     for (byte x = 0; x < WORLD_XZ; x++)
         for (byte y = 0; y < WORLD_Y; y++)
             for (byte z = 0; z < WORLD_XZ; z++)
@@ -138,6 +139,7 @@ static void _settle_cubes() {
     bool retry;
     do {
         retry = false;
+        #pragma omp parallel for
         for (byte x = 0; x < WORLD_XZ; x++) {
             for (byte y = WORLD_Y - 1; y > 1; y--) {
                 for (byte z = 0; z < WORLD_XZ; z++) {
@@ -154,6 +156,7 @@ static void _settle_cubes() {
 
 static void _add_base_layer() {
     // add plane of cubes along bottom border
+    #pragma omp parallel for collapse(2)
     for (int x = 0; x < WORLD_XZ; x++) {
         for (int z = 0; z < WORLD_XZ; z++) {
             world_terrain[x][0][z] = COLOUR_BLACK;
@@ -164,6 +167,7 @@ static void _add_base_layer() {
 static void _cull_overlapping_cubes() {
     // limit 1 cube to x/z coordinate
     bool ceil;
+    #pragma omp parallel for collapse(2)
     for (int x = 0; x < WORLD_XZ; x++) {
         for (int z = 0; z < WORLD_XZ; z++) {
             ceil = false;
@@ -235,6 +239,7 @@ void pgm_set_world_terrain() {
     double sx, sy, sz;
     byte y;
     // nearest neighbour interpolation
+    #pragma omp parallel for
     for (byte x = 0; x < WORLD_XZ; x++) {
         for (byte z = 0; z < WORLD_XZ; z++) {
             sx = x * x_scale;

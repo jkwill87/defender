@@ -263,14 +263,26 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
         new_centre_y = by + (ty - by) / 2.0f;
         new_centre_z = bz + (tz - bz) / 2.0f;
         l++;
-        tree(bx, by, bz, new_centre_x, new_centre_y, new_centre_z, l);
-        tree(new_centre_x, by, bz, tx, new_centre_y, new_centre_z, l);
-        tree(bx, by, new_centre_z, new_centre_x, new_centre_y, tz, l);
-        tree(new_centre_x, by, new_centre_z, tx, new_centre_y, tz, l);
-        tree(bx, new_centre_y, bz, new_centre_x, ty, new_centre_z, l);
-        tree(new_centre_x, new_centre_y, bz, tx, ty, new_centre_z, l);
-        tree(bx, new_centre_y, new_centre_z, new_centre_x, ty, tz, l);
-        tree(new_centre_x, new_centre_y, new_centre_z, tx, ty, tz, l);
+
+        // split the calculation up between threads
+        #pragma omp parallel sections
+        {
+            #pragma omp section
+            {
+                tree(bx, by, bz, new_centre_x, new_centre_y, new_centre_z, l);
+                tree(new_centre_x, by, bz, tx, new_centre_y, new_centre_z, l);
+                tree(bx, by, new_centre_z, new_centre_x, new_centre_y, tz, l);
+                tree(new_centre_x, by, new_centre_z, tx, new_centre_y, tz, l);
+            }
+
+            #pragma omp section
+            {
+                tree(bx, new_centre_y, bz, new_centre_x, ty, new_centre_z, l);
+                tree(new_centre_x, new_centre_y, bz, tx, ty, new_centre_z, l);
+                tree(bx, new_centre_y, new_centre_z, new_centre_x, ty, tz, l);
+                tree(new_centre_x, new_centre_y, new_centre_z, tx, ty, tz, l);
+            }
+        }
         return;
     }
     for (int x = (int) bx; x < tx + 1; x++) {

@@ -8,10 +8,19 @@ extern World world_units;
 
 using namespace std;
 
-void unit_update_all() {
-    memset(world_units, 0, WORLD_XZ * WORLD_XZ * WORLD_Y);  // clear units
+void unit_cycle() {
+    // Increment timer cycle count
+    ++Unit::cycle;
+    // Update unit position buffer
+    memset(world_units, 0, WORLD_XZ * WORLD_XZ * WORLD_Y);
+    #pragma omp parallel for
     for (long i = Unit::units.size(); i > 0; i--) {
         Unit::units[i - 1]->render();
+    }
+    // Process unit ai
+    #pragma omp parallel for
+    for (long i = Unit::units.size(); i > 0; i--) {
+        Unit::units[i - 1]->ai();
     }
 }
 

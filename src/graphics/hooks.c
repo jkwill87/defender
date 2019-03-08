@@ -6,7 +6,6 @@ extern View view;
 extern Config config;
 extern Laser laser;
 
-
 // Hook Callback Definitions ---------------------------------------------------
 
 void glut_hook_default__draw_2d() {
@@ -27,9 +26,7 @@ void glut_hook_default__idle_update() {
     frame++;
     bool next_tick = time - timer_base > 100 / GAME_SPEED;
     // log profiling information
-    if (next_tick && config.show_fps) {
-        printf("FPS: %4.2f\n", frame * 1000.0f / (time - timer_base));
-    }
+    if (next_tick && config.show_fps) log_fps(frame, time, timer_base);
     // reset laser cooldown
     bool laser_cooldown = time - laser_base > 350;
     if (!laser.active) {

@@ -1,15 +1,15 @@
 #include <sstream>
 
-#include <units.hpp>
-#include <exec.hpp>
-
 #include "debug.h"
+#include "units.hpp"
 
 using namespace std;
+
 
 // External Variable Declarations ----------------------------------------------
 
 extern World world_terrain;
+extern World world_units;
 
 
 // Constructor Definition ------------------------------------------------------
@@ -23,73 +23,103 @@ Lander::Lander(int x, int y, int z) : Unit(x, y, z, "lander") {
     layout[{-1, +1, +0}] = COLOUR_GREEN;
     layout[{+1, +1, +0}] = COLOUR_GREEN;
     layout[{+0, +2, +0}] = COLOUR_YELLOW;
+    origin.y = max(origin.y, calc_min_y() + MAP_CLEAR);
+    target = calc_random_coordinate(true);
 }
 
 Lander::Lander(Coordinate coordinate) :
     Lander(coordinate.x, coordinate.y, coordinate.z) {}
 
 
-// Private Methods -------------------------------------------------------------
+Lander::Lander() : Lander(calc_random_coordinate()) {}
 
-void Lander::ai_search() {
-    if (is_at_target()) {
-        // Set a new search position
-        target = gen_random_edge_coord();
-    } else if (!captive) {
-        // Attempt to find a human target
-        Human *human;
-        for (Unit *unit: Unit::units) {
-            human = dynamic_cast<Human *>(unit);
-            if (!human) continue;
-            if (!human->available) continue;
-            captive = human;
-            human->available = false;
-            state = PURSUING;
-            log("%s targetted %s", as_str.c_str(), captive->as_str.c_str());
-            break;
+
+// Private Method Definitions --------------------------------------------------
+
+void Lander::look() {
+    if (WORLD_Y - origin.y < 3) {
+        state = EXITED;
+        return;
+    }
+    int captive_distance = y_distance(captive);
+    if (captive_distance > 0 && captive_distance < MAP_CLEAR * 2) {
+        state = ESCAPING;
+        return;
+    }
+    if (captive_distance > 0) {
+        state = CAPTURING;
+        return;
+    }
+    Coordinate idx1;  // coordinate from
+    idx1.x = max(origin.x - LANDER_VISIBILITY, 0);
+    idx1.z = max(origin.z - LANDER_VISIBILITY, 0);
+    idx1.y = 0;
+    Coordinate idx2;  // coordinate to
+    idx2.x = min(origin.x + LANDER_VISIBILITY, WORLD_XZ - 1);
+    idx2.z = min(origin.z + LANDER_VISIBILITY, WORLD_XZ - 1);
+    idx2.y = origin.y;
+    Coordinate idx;  // coordinate counter
+    for (idx.x = idx1.x; idx.x < idx2.x; idx.x++) {
+        for (idx.z = idx1.z; idx.z < idx2.z; idx.z++) {
+            for (idx.y = idx1.y; idx.y < idx2.y; idx.y++) {
+                if (world_units[idx.x][idx.y][idx.z]) {
+                    auto human = dynamic_cast<Human *>(find_unit(idx));
+                    if (human && human->available) {
+                        state = PURSUING;
+                        captive = human;
+                        return;
+                    }
+                }
+            }
         }
     }
+    state = SEARCHING;
 }
 
-void Lander::ai_pursue() {
-    assert_ok(captive, "no target to pursue");
-    target.x = captive->origin.x;
-    target.z = captive->origin.z;
-    move_to_target();
-    if (y_distance(captive)) {
-        captive->action_lift();
-        state = CAPTURING;
-        log("%s capturing %s", as_str.c_str(), captive->as_str.c_str());
+
+// Public Method Definitions ---------------------------------------------------
+
+void Lander::ai() {
+    switch (state) {
+        case SEARCHING:
+            if (
+                origin.x <= MAP_CLEAR || origin.x >= WORLD_XZ - MAP_CLEAR ||
+                origin.z <= MAP_CLEAR || origin.z >= WORLD_XZ - MAP_CLEAR
+                ) {
+                log("%s searching elsewhere", as_str.c_str());
+                target = calc_random_coordinate(true);
+                target.y = min(origin.y + 1, WORLD_Y - MAP_CLEAR);
+            }
+            break;
+        case PURSUING:
+            target.x = captive->origin.x;
+            target.z = captive->origin.z;
+            target.y = min(captive->origin.y + MAP_CLEAR, WORLD_Y - MAP_CLEAR);
+            break;
+        case CAPTURING:
+            target.y = min(captive->origin.y + MAP_CLEAR, WORLD_Y - MAP_CLEAR);
+            break;
+        case ESCAPING:
+            if (cycle % 10 == 0) {
+                ++target.y;
+                captive->action_lift();
+            }
+            break;
+        case EXITED:
+            captive->action_capture();
+            remove();
+            log("%s escaped", as_str.c_str());
+            return;
+        case KILLED:
+            remove();
+            log("%s killed", as_str.c_str());
+            return;
     }
+    look();
+    Unit::ai();
 }
 
-void Lander::ai_capture() {
-    assert_ok(captive, "no target to capture");
-    if (has_captive()) {
-        state = ESCAPING;
-    } else if (!getting_captive()) {
-        captive = nullptr;
-        state = SEARCHING;
-        log("%s escaping", as_str.c_str());
-    }
-}
-
-void Lander::ai_escape() {
-    assert_ok(captive, "no target to escape with");
-    if (WORLD_Y - origin.y < 0) {
-        captive->action_capture();
-        state = KILLED;
-        log("%s escaped", as_str.c_str());
-    } else if (has_captive()) {
-        ++target.y;
-    } else if (!getting_captive()) {
-        captive = nullptr;
-        state = SEARCHING;
-        log("%s escaping", as_str.c_str());
-    }
-}
-
-void Lander::animate_rotation() {
+void Lander::render() {
     if (cycle % 2) {
         layout[{+0, +0, +1}] = COLOUR_GREEN;
         layout[{+0, +0, -1}] = COLOUR_GREEN;
@@ -101,46 +131,11 @@ void Lander::animate_rotation() {
         layout[{-1, +0, +0}] = COLOUR_GREEN;
         layout[{+1, +0, +0}] = COLOUR_GREEN;
     }
-}
-
-bool Lander::has_captive() {
-    return y_distance(captive) < 6;
-}
-
-bool Lander::getting_captive() {
-    return y_distance(captive) != 0;
-}
-
-
-// Public Methods --------------------------------------------------------------
-
-void Lander::render() {
-    switch (state) {
-        case SEARCHING:
-            ai_search();
-            break;
-        case PURSUING:
-            ai_pursue();
-            break;
-        case CAPTURING:
-            ai_capture();
-            break;
-        case ESCAPING:
-            ai_escape();
-            break;
-        case KILLED:
-            remove();
-            break;
-    }
-    animate_rotation();
     Unit::render();
 }
 
-
-void Lander::action_hit() {
-    log("%s shot down", as_str.c_str());
-    if (captive) {
-        captive->action_drop();
-    }
+void Lander::shoot() {
+    if (captive) captive->action_drop();
     state = KILLED;
+    Unit::shoot();
 }

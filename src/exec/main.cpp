@@ -5,9 +5,10 @@
  */
 
 #include <string.h>
+
 #include "debug.h"
-#include "exec.h"
 #include "graphics.h"
+#include "units.hpp"
 
 
 // External Variable Declarations ----------------------------------------------
@@ -42,11 +43,10 @@ int main(int argc, char **argv) {
     pgm_set_world_terrain();
 
     log("adding units");
-    place_random_humans(10);
-    place_random_aliens(11);
+    for (int i = 0; i < 10; i++) new Human();
+    for (int i = 0; i < 11; i++) new Lander();
 
     log("starting game");
     start_game(&argc, argv);
-
     return 0;
 }

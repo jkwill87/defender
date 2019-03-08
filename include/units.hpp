@@ -36,23 +36,22 @@ class Unit {
 
     public:
     Unit(int x, int y, int z, std::string name);
-    Unit(Coordinate coordinate, std::string name);
     virtual ~Unit();
 
     // Method Declarations  ----------------------------------------------------
 
     protected:
-    int y_distance(const Unit *target);
-    void move_to_target();
-    bool is_at_target();
+    static byte calc_min_y();
+    static coordinate calc_random_coordinate(bool edge = false);
     void remove();
+    int y_distance(const Unit *target);
 
     public:
-    virtual void action_hit() = 0;
-    bool is_occupying(Coordinate &pos);
-    virtual void render();
+    static Unit *find_unit(Coordinate coordinate);
     virtual void ai();
-    static Unit *find_at_coordinate(Coordinate coordinate);
+    virtual void render();
+    virtual void shoot();
+    bool is_occupying(Coordinate &pos);
 };
 
 
@@ -64,7 +63,7 @@ class Human : public Unit {
 
     private:
     typedef enum {
-        SETTLED=0,
+        SETTLED = 0,
         FALLING,
         FLOATING,
         KILLED
@@ -85,21 +84,17 @@ class Human : public Unit {
     public:
     Human(int x, int y, int z);
     explicit Human(Coordinate coordinate);
+    explicit Human();
 
     // Method Declarations  ----------------------------------------------------
-
-    private:
-    void ai_settled();
-    void ai_floating();
-    void ai_falling();
 
     public:
     void ai() override;
     void render() override;
-    void action_drop();
+    void shoot() override;
     void action_lift();
+    void action_drop();
     void action_capture();
-    void action_hit() override;
 };
 
 
@@ -111,25 +106,18 @@ class Lander : public Unit {
 
     private:
     typedef enum {
-        SEARCHING=0,
+        SEARCHING = 0,
         PURSUING,
         CAPTURING,
         ESCAPING,
+        EXITED,
         KILLED
     } State;
-
-    typedef enum {
-        UNDETECTED=0,
-        DETECTED,
-        LOCATED,
-        LOCKED_ON
-    } Awareness;
 
     // Instance Variables ------------------------------------------------------
 
     private:
     State state = SEARCHING;
-    Awareness awareness = UNDETECTED;
     Human *captive = nullptr;
 
     // Constructor Declarations ------------------------------------------------
@@ -137,18 +125,15 @@ class Lander : public Unit {
     public:
     Lander(int x, int y, int z);
     explicit Lander(Coordinate coordinate);
+    explicit Lander();
 
     // Method Declarations  ----------------------------------------------------
 
     private:
-    void ai_search();
-    void ai_pursue();
-    void ai_capture();
-    void ai_escape();
     void look();
 
     public:
     void ai() override;
     void render() override;
-    void action_hit() override;
+    void shoot() override;
 };

@@ -78,8 +78,8 @@ typedef struct glut_hooks {
 
 typedef struct laser {
     bool active;
-    Coordinate from;
-    Coordinate to;
+    Position from;
+    Position to;
 } Laser;
 
 typedef struct pgm {

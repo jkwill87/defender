@@ -84,13 +84,13 @@ static void _calc_line_of_sight() {
     float rot_x = (view.cam_x / 180.0f * PI);
     float rot_y = (view.cam_y / 180.0f * PI);
     // from
-    laser.from.x = (int) (player_pos.x * -1);
-    laser.from.y = (int) (player_pos.y * -1 - 1);
-    laser.from.z = (int) (player_pos.z * -1);
+    laser.from.x = player_pos.x * -1;
+    laser.from.y = player_pos.y * -1 - 1;
+    laser.from.z = player_pos.z * -1;
     // to
-    laser.to.x = (int) ((player_pos.x - sinf(rot_y) * LASER_DIST) * -1 - laser.from.x);
-    laser.to.y = (int) ((player_pos.y + sinf(rot_x) * LASER_DIST) * -1 - laser.from.y);
-    laser.to.z = (int) ((player_pos.z + cosf(rot_y) * LASER_DIST) * -1 - laser.from.z);
+    laser.to.x = (player_pos.x - sinf(rot_y) * LASER_DIST) * -1 - laser.from.x;
+    laser.to.y = (player_pos.y + sinf(rot_x) * LASER_DIST) * -1 - laser.from.y;
+    laser.to.z = (player_pos.z + cosf(rot_y) * LASER_DIST) * -1 - laser.from.z;
 }
 
 static void _laser_draw() {
@@ -196,11 +196,7 @@ void start_game(int *argc, char **argv) {
     // initialize map
     map_pos_update();
     // start game loop
-#ifndef __APPLE__
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
-#endif
     glutMainLoop();
-
 }
 
 void glut_hook_default__display() {
@@ -250,12 +246,14 @@ void glut_hook_default__display() {
 }
 
 void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
-    float length;
-    length = (tx - bx) / 2.0f;
-    if (length < 0)
-        length *= -1;
-    if (!_cube_in_frustrum(bx + ((tx - bx) / 2), by + ((ty - by) / 2),
-                           bz + ((tz - bz) / 2), length))
+    float length = (tx - bx) / 2.0f;
+    if (length < 0) length *= -1;
+    if (!_cube_in_frustrum(
+        bx + ((tx - bx) / 2),
+        by + ((ty - by) / 2),
+        bz + ((tz - bz) / 2),
+        length)
+        )
         return;
     if (l != 1) {
         float new_centre_x, new_centre_y, new_centre_z;

@@ -11,7 +11,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
-#include <GL/freeglut.h>
 
 #endif
 
@@ -65,12 +64,6 @@ void map_terrain_layer();
 void map_player_layer();
 void map_npc_layer();
 void map_laser_layer();
-
-// Movement Function Declarations ----------------------------------------------
-
-void calc_player_move(Direction direction);
-bool has_collided(Coordinate coord);
-bool has_laser_collided();
 
 
 #ifdef __cplusplus

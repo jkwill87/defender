@@ -107,11 +107,11 @@ void Lander::ai() {
             break;
         case EXITED:
             captive->action_capture();
-            remove();
+            to_remove=true;
             log("%s escaped", as_str.c_str());
             return;
         case KILLED:
-            remove();
+            to_remove=true;
             log("%s killed", as_str.c_str());
             return;
     }

@@ -143,7 +143,7 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
         case 'q':
         case 27:
             log("exiting");
-            unit_rm_all();
+            unit_purge();
             glutDestroyWindow(glutGetWindow());
             exit(0);
         case 'f':

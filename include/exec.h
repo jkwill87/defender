@@ -10,7 +10,9 @@ extern "C" {
 // Function Declarations -------------------------------------------------------
 
 void unit_cycle();
-void unit_rm_all();
+void unit_purge();
+void unit_init();
+Human * find_human(Coordinate coordinate);
 
 #ifdef __cplusplus
 }

@@ -53,7 +53,7 @@ void Human::ai() {
             assert_lte(target.y - 2, WORLD_Y, "out of bounds");
             break;
         case KILLED:
-            remove();
+            to_remove=true;
             return;
     }
     Unit::ai();

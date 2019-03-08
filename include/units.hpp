@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+
 #include "types.h"
 
 
@@ -21,14 +22,15 @@ class Unit {
 
     private:
     const long id;
+    static long id_counter;
 
     protected:
     Coordinate target;
     Layout layout;
+    bool to_remove=false;
 
     public:
     Coordinate origin;
-    static std::vector<Unit *> units;
     static byte cycle;
     const std::string as_str;
 
@@ -43,15 +45,18 @@ class Unit {
     protected:
     static byte calc_min_y();
     static coordinate calc_random_coordinate(bool edge = false);
-    void remove();
     int y_distance(const Unit *target);
 
     public:
-    static Unit *find_unit(Coordinate coordinate);
     virtual void ai();
     virtual void render();
     virtual void shoot();
     bool is_occupying(Coordinate &pos);
+
+
+    // Friendship Declarations  ------------------------------------------------
+
+    friend void unit_cycle();
 };
 
 

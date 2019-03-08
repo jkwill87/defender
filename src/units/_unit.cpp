@@ -48,18 +48,17 @@ static byte _gen_random(int min, int max) {
 
 // Static Variable Definitions -------------------------------------------------
 
-vector<Unit *> Unit::units;
 byte Unit::cycle = 0;
+long id_counter = 0;
 
 
 // Constructor Definitions -----------------------------------------------------
 
 Unit::Unit(int x, int y, int z, string name) :
-    id(units.size()),
+    id(id_counter++),
     target({x, max(y, WORLD_Y - MAP_CLEAR), z}),
     origin(target),
-    as_str(name + " id:" + to_string(units.size())) {
-    units.push_back(this);
+    as_str(name + " id:" + to_string(id)) {
     assert_gte(x, 0, "x out of bounds");
     assert_gte(y, 0, "y out of bounds");
     assert_gte(z, 0, "z out of bounds");
@@ -70,13 +69,7 @@ Unit::Unit(int x, int y, int z, string name) :
 }
 
 Unit::~Unit() {
-    auto iter = find(units.begin(), units.end(), this);
-    if (iter != units.end()) {
-        log("%s destroyed", as_str.c_str());
-        units.erase(iter);
-    } else {
-        assert_ok(false, "could not unregister unit");
-    }
+    log("%s destroyed", as_str.c_str());
 }
 
 
@@ -124,11 +117,6 @@ coordinate Unit::calc_random_coordinate(bool edge) {
     return already_occupied ? calc_random_coordinate(edge) : coordinate;
 }
 
-void Unit::remove() {
-    const auto vec_addr = std::find(units.begin(), units.end(), this);
-    units.erase(vec_addr);
-}
-
 int Unit::y_distance(const Unit *target) {
     int distance = 0;
     if (target && origin.x == target->origin.x &&
@@ -141,15 +129,6 @@ int Unit::y_distance(const Unit *target) {
 
 
 // Public Method Definitions ---------------------------------------------------
-
-Unit *Unit::find_unit(Coordinate coordinate) {
-    for (Unit *unit: Unit::units) {
-        if (unit->is_occupying(coordinate)) {
-            return unit;
-        }
-    }
-    return nullptr;
-}
 
 void Unit::ai() {
     if (origin.x - target.x < 0) origin.x++;

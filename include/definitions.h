@@ -7,6 +7,8 @@
 #define WORLD_XZ 100         // 50..150
 #define WORLD_Y 50           // 50..150
 #define LANDER_VISIBILITY 2  //  1..15
+#define LANDER_COUNT 11
+#define HUMAN_COUNT 10
 
 // Not so much...
 #define LASER_DIST (WORLD_XZ * 1.5f)

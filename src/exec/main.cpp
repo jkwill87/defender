@@ -6,7 +6,7 @@
 
 #include <string.h>
 #include "debug.h"
-#include "exec.hpp"
+#include "exec.h"
 #include "graphics.h"
 
 
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 
     log("adding units");
     place_random_humans(10);
-    place_random_aliens(2);
+    place_random_aliens(11);
 
     log("starting game");
     start_game(&argc, argv);

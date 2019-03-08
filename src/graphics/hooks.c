@@ -1,4 +1,4 @@
-#include "exec.hpp"
+#include "exec.h"
 #include "debug.h"
 #include "graphics.h"
 
@@ -25,7 +25,7 @@ void glut_hook_default__idle_update() {
     // calculate time delta
     int time = glutGet(GLUT_ELAPSED_TIME);
     frame++;
-    bool next_tick = time - timer_base > 100;
+    bool next_tick = time - timer_base > 100 / GAME_SPEED;
     // log profiling information
     if (next_tick && config.show_fps) {
         printf("FPS: %4.2f\n", frame * 1000.0f / (time - timer_base));
@@ -45,8 +45,7 @@ void glut_hook_default__idle_update() {
     timer_base = time;
     frame = 0;
     // trigger unit movement
-    unit_update_all();
-    glutPostRedisplay();
+    unit_cycle();
 }
 
 void glut_hook_default__keyboard(unsigned char key, int x, int y) {
@@ -57,11 +56,11 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
         log("exiting");
             unit_rm_all();
 #ifdef __APPLE__
-            glutDestroyWindow(glutGetWindow());
-            exit(0);
+        glutDestroyWindow(glutGetWindow());
+        exit(0);
 #else
-        glutLeaveMainLoop();
-        break;
+            glutLeaveMainLoop();
+            break;
 #endif
         case 'f':
             config.fly_control = !config.fly_control;

@@ -84,13 +84,13 @@ static void _calc_line_of_sight() {
     float rot_x = (view.cam_x / 180.0f * PI);
     float rot_y = (view.cam_y / 180.0f * PI);
     // from
-    laser.from.x = player_pos.x * -1;
-    laser.from.y = player_pos.y * -1 - 1;
-    laser.from.z = player_pos.z * -1;
+    laser.from.x = (int) (player_pos.x * -1);
+    laser.from.y = (int) (player_pos.y * -1 - 1);
+    laser.from.z = (int) (player_pos.z * -1);
     // to
-    laser.to.x = (player_pos.x - sinf(rot_y) * LASER_DIST) * -1 - laser.from.x;
-    laser.to.y = (player_pos.y + sinf(rot_x) * LASER_DIST) * -1 - laser.from.y;
-    laser.to.z = (player_pos.z + cosf(rot_y) * LASER_DIST) * -1 - laser.from.z;
+    laser.to.x = (int) ((player_pos.x - sinf(rot_y) * LASER_DIST) * -1 - laser.from.x);
+    laser.to.y = (int) ((player_pos.y + sinf(rot_x) * LASER_DIST) * -1 - laser.from.y);
+    laser.to.z = (int) ((player_pos.z + cosf(rot_y) * LASER_DIST) * -1 - laser.from.z);
 }
 
 static void _laser_draw() {
@@ -132,6 +132,7 @@ static void _draw_world() {
             }
         }
     } else {
+        build_display_list();
         for (int i = 0; i < view.count; i++) {
             _draw_cube(
                 &world_terrain,
@@ -203,9 +204,7 @@ void start_game(int *argc, char **argv) {
 }
 
 void glut_hook_default__display() {
-    glutPostRedisplay();
     view.count = 0;
-    build_display_list();
     glClear(GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glRotatef(view.cam_x, 1.0, 0.0, 0.0);
@@ -247,6 +246,7 @@ void glut_hook_default__display() {
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
     glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
@@ -343,60 +343,100 @@ void frustrum_extract() {
     f[0][1] = c[7] - c[4];
     f[0][2] = c[11] - c[8];
     f[0][3] = c[15] - c[12];
-    t = sqrtf(f[0][0] * f[0][0] + f[0][1] * f[0][1] + f[0][2] * f[0][2]);
-    f[0][0] /= t;
-    f[0][1] /= t;
-    f[0][2] /= t;
-    f[0][3] /= t;
-    f[1][0] = c[3] + c[0];
-    f[1][1] = c[7] + c[4];
-    f[1][2] = c[11] + c[8];
-    f[1][3] = c[15] + c[12];
-    t = sqrtf(f[1][0] * f[1][0] + f[1][1] * f[1][1] + f[1][2] * f[1][2]);
-    f[1][0] /= t;
-    f[1][1] /= t;
-    f[1][2] /= t;
-    f[1][3] /= t;
-    f[2][0] = c[3] + c[1];
-    f[2][1] = c[7] + c[5];
-    f[2][2] = c[11] + c[9];
-    f[2][3] = c[15] + c[13];
-    t = sqrtf(f[2][0] * f[2][0] + f[2][1] * f[2][1] + f[2][2] * f[2][2]);
-    f[2][0] /= t;
-    f[2][1] /= t;
-    f[2][2] /= t;
-    f[2][3] /= t;
-    f[3][0] = c[3] - c[1];
-    f[3][1] = c[7] - c[5];
-    f[3][2] = c[11] - c[9];
-    f[3][3] = c[15] - c[13];
-    t = sqrtf(f[3][0] * f[3][0] + f[3][1] * f[3][1] + f[3][2] * f[3][2]);
-    f[3][0] /= t;
-    f[3][1] /= t;
-    f[3][2] /= t;
-    f[3][3] /= t;
-    f[4][0] = c[3] - c[2];
-    f[4][1] = c[7] - c[6];
-    f[4][2] = c[11] - c[10];
-    f[4][3] = c[15] - c[14];
-    t = sqrtf(f[4][0] * f[4][0] + f[4][1] * f[4][1] + f[4][2] * f[4][2]);
-    f[4][0] /= t;
-    f[4][1] /= t;
-    f[4][2] /= t;
-    f[4][3] /= t;
-    f[5][0] = c[3] + c[2];
-    f[5][1] = c[7] + c[6];
-    f[5][2] = c[11] + c[10];
-    f[5][3] = c[15] + c[14];
-    t = sqrtf(f[5][0] * f[5][0] + f[5][1] * f[5][1] + f[5][2] * f[5][2]);
-    f[5][0] /= t;
-    f[5][1] /= t;
-    f[5][2] /= t;
-    f[5][3] /= t;
+
+    // split the calculation up between threads
+    #pragma omp parallel sections private(t)
+    {
+        #pragma omp section
+        {
+            t = sqrtf(
+                f[0][0] * f[0][0] + f[0][1] * f[0][1] + f[0][2] * f[0][2]
+            );
+            f[0][0] /= t;
+            f[0][1] /= t;
+            f[0][2] /= t;
+            f[0][3] /= t;
+        }
+
+        #pragma omp section
+        {
+            f[1][0] = c[3] + c[0];
+            f[1][1] = c[7] + c[4];
+            f[1][2] = c[11] + c[8];
+            f[1][3] = c[15] + c[12];
+            t = sqrtf(
+                f[1][0] * f[1][0] + f[1][1] * f[1][1] + f[1][2] * f[1][2]
+            );
+            f[1][0] /= t;
+            f[1][1] /= t;
+            f[1][2] /= t;
+            f[1][3] /= t;
+        }
+
+        #pragma omp section
+        {
+            f[2][0] = c[3] + c[1];
+            f[2][1] = c[7] + c[5];
+            f[2][2] = c[11] + c[9];
+            f[2][3] = c[15] + c[13];
+            t = sqrtf(
+                f[2][0] * f[2][0] + f[2][1] * f[2][1] + f[2][2] * f[2][2]
+            );
+            f[2][0] /= t;
+            f[2][1] /= t;
+            f[2][2] /= t;
+            f[2][3] /= t;
+        }
+
+        #pragma omp section
+        {
+            f[3][0] = c[3] - c[1];
+            f[3][1] = c[7] - c[5];
+            f[3][2] = c[11] - c[9];
+            f[3][3] = c[15] - c[13];
+            t = sqrtf(
+                f[3][0] * f[3][0] + f[3][1] * f[3][1] + f[3][2] * f[3][2]
+            );
+            f[3][0] /= t;
+            f[3][1] /= t;
+            f[3][2] /= t;
+            f[3][3] /= t;
+        }
+
+        #pragma omp section
+        {
+            f[4][0] = c[3] - c[2];
+            f[4][1] = c[7] - c[6];
+            f[4][2] = c[11] - c[10];
+            f[4][3] = c[15] - c[14];
+            t = sqrtf(
+                f[4][0] * f[4][0] + f[4][1] * f[4][1] + f[4][2] * f[4][2]
+            );
+            f[4][0] /= t;
+            f[4][1] /= t;
+            f[4][2] /= t;
+            f[4][3] /= t;
+        }
+
+        #pragma omp section
+        {
+            f[5][0] = c[3] + c[2];
+            f[5][1] = c[7] + c[6];
+            f[5][2] = c[11] + c[10];
+            f[5][3] = c[15] + c[14];
+            t = sqrtf(
+                f[5][0] * f[5][0] + f[5][1] * f[5][1] + f[5][2] * f[5][2]
+            );
+            f[5][0] /= t;
+            f[5][1] /= t;
+            f[5][2] /= t;
+            f[5][3] /= t;
+        }
+    }
 }
 
 void build_display_list() {
     frustrum_extract();
+    view.count = 0;
     tree(0, 0, 0, WORLD_XZ, WORLD_Y, WORLD_XZ, 0);
-    glutPostRedisplay();
 }

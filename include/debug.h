@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "types.h"
 
+
 #ifndef NDEBUG
     #define assert_ok(a, msg)if(!(a)){fprintf(stderr,"error: %s:%d %s()\n\t%s\n\n",__FILE__,__LINE__,__func__,(msg));abort();}
     #define assert_not(a, msg)if((a)){fprintf(stderr,"error: %s:%d %s()\n\t%s\n\n",__FILE__,__LINE__,__func__,(msg));abort();}

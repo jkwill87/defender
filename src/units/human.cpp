@@ -1,3 +1,6 @@
+
+#include <units.hpp>
+
 #include "debug.h"
 #include "units.hpp"
 
@@ -11,7 +14,7 @@ extern World world_terrain;
 
 // Constructor Definitions -----------------------------------------------------
 
-Human::Human(int x, int y, int z) : Unit(x, y, z, "human") {
+Human::Human(int x, int y, int z) : Unit(x, y, z) {
     layout[{+0, -1, +0}] = COLOUR_GREEN;
     layout[{+0, +0, +0}] = COLOUR_RED;
     layout[{+0, +1, +0}] = COLOUR_ORANGE;
@@ -23,6 +26,7 @@ Human::Human(int x, int y, int z) : Unit(x, y, z, "human") {
         }
     }
     origin.y = target.y = terrain_height;
+    log("%s placed at {%02d,%02d,%02d}", as_str().c_str(), x, y, z);
 }
 
 Human::Human(Coordinate coordinate) :
@@ -83,14 +87,18 @@ void Human::action_lift() {
 }
 
 void Human::action_drop() {
-    log("%s dropped", as_str.c_str());
+    log("%s dropped", as_str().c_str());
     fall_height = 0;
     available = true;
     state = FALLING;
 }
 
 void Human::action_capture() {
-    log("%s captured", as_str.c_str());
+    log("%s captured", as_str().c_str());
     available = false;
     state = KILLED;
+}
+
+string Human::as_str() {
+    return "human id: " + to_string(id);
 }

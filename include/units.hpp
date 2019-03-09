@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <functional>
+
 
 #include "types.h"
 
@@ -21,24 +23,23 @@ class Unit {
     // Instance Variables ------------------------------------------------------
 
     private:
-    const long id;
     static long id_counter;
 
     protected:
+    const long id;
     Coordinate target;
     Layout layout;
     bool to_remove=false;
+    static byte cycle;
+    virtual std::string as_str()=0;
 
     public:
     Coordinate origin;
-    static byte cycle;
-    const std::string as_str;
 
     // Constructor Declarations ------------------------------------------------
 
     public:
-    Unit(int x, int y, int z, std::string name);
-    virtual ~Unit();
+    Unit(int x, int y, int z);
 
     // Method Declarations  ----------------------------------------------------
 
@@ -46,8 +47,6 @@ class Unit {
     static byte calc_min_y();
     static coordinate calc_random_coordinate(bool edge = false);
     int y_distance(const Unit *target);
-
-    public:
     virtual void ai();
     virtual void render();
     virtual void shoot();
@@ -56,6 +55,7 @@ class Unit {
 
     // Friendship Declarations  ------------------------------------------------
 
+    friend class EventManager;
     friend void unit_cycle();
 };
 
@@ -92,14 +92,16 @@ class Human : public Unit {
     explicit Human();
 
     // Method Declarations  ----------------------------------------------------
-
-    public:
+    protected:
     void ai() override;
     void render() override;
     void shoot() override;
+
+    public:
     void action_lift();
     void action_drop();
     void action_capture();
+    std::string as_str() override;
 };
 
 
@@ -123,7 +125,8 @@ class Lander : public Unit {
 
     private:
     State state = SEARCHING;
-    Human *captive = nullptr;
+    std::function<Human *()> get_captive;
+    std::function<Human *(Coordinate coordinate)> set_captive;
 
     // Constructor Declarations ------------------------------------------------
 
@@ -137,8 +140,13 @@ class Lander : public Unit {
     private:
     void look();
 
-    public:
+    protected:
     void ai() override;
     void render() override;
     void shoot() override;
+
+    public:
+    std::string as_str() override;
+    friend class EventManager;
+
 };

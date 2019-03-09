@@ -49,27 +49,21 @@ static byte _gen_random(int min, int max) {
 // Static Variable Definitions -------------------------------------------------
 
 byte Unit::cycle = 0;
-long id_counter = 0;
-
+long Unit::id_counter=0;
 
 // Constructor Definitions -----------------------------------------------------
 
-Unit::Unit(int x, int y, int z, string name) :
+Unit::Unit(int x, int y, int z) :
     id(id_counter++),
     target({x, max(y, WORLD_Y - MAP_CLEAR), z}),
-    origin(target),
-    as_str(name + " id:" + to_string(id)) {
+    origin(target)
+{
     assert_gte(x, 0, "x out of bounds");
     assert_gte(y, 0, "y out of bounds");
     assert_gte(z, 0, "z out of bounds");
     assert_lt(x, WORLD_XZ, "x out of bounds");
     assert_lt(y, WORLD_Y, "y out of bounds");
     assert_lt(z, WORLD_XZ, "z out of bounds");
-    log("%s placed at {%02d,%02d,%02d}", as_str.c_str(), x, y, z);
-}
-
-Unit::~Unit() {
-    log("%s destroyed", as_str.c_str());
 }
 
 
@@ -151,7 +145,7 @@ void Unit::render() {
 }
 
 void Unit::shoot() {
-    log("%s shot down", as_str.c_str());
+    log("%s shot down", as_str().c_str());
 }
 
 bool Unit::is_occupying(Coordinate &pos) {

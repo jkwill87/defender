@@ -1,11 +1,10 @@
 /**
- * main.c
+ * main.cpp
  *
  * The game's entry point.
  */
 
 #include <string.h>
-
 #include "debug.h"
 #include "graphics.h"
 #include "units.hpp"
@@ -43,8 +42,8 @@ int main(int argc, char **argv) {
     pgm_set_world_terrain();
 
     log("adding units");
-    for (int i = 0; i < 10; i++) new Human();
-    for (int i = 0; i < 11; i++) new Lander();
+    for (int i = 0; i < HUMAN_COUNT; i++) new Human();
+    for (int i = 0; i < LANDER_COUNT; i++) new Lander();
 
     log("starting game");
     start_game(&argc, argv);

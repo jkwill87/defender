@@ -1,6 +1,11 @@
+/**
+ * pgm.c
+ *
+ * Logic for parsing and transforming map data from PGM files.
+ */
+
 #include <ctype.h>
 #include <unistd.h>
-
 #include "debug.h"
 
 #define _PATH_BUFFER 100
@@ -159,7 +164,7 @@ static void _add_base_layer() {
     #pragma omp parallel for collapse(2)
     for (int x = 0; x < WORLD_XZ; x++)
         for (int z = 0; z < WORLD_XZ; z++)
-            if(!world_terrain[x][1][z])
+            if (!world_terrain[x][1][z])
                 world_terrain[x][0][z] = COLOUR_BLACK;
 }
 

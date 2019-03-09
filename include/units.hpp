@@ -137,5 +137,5 @@ class Lander : public Unit {
     public:
     void ai() override;
     void render() override;
-    void action_restart_search();
+    void new_search_path();
 };

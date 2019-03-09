@@ -1,5 +1,10 @@
-#include <math.h>
+/**
+ * hooks.c
+ *
+ * Default GLUT hooks used by engine.
+ */
 
+#include <math.h>
 #include "debug.h"
 #include "exec.h"
 #include "graphics.h"

@@ -2,7 +2,7 @@ build_dir := build
 libs_dir := -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks
 c99_source := $(addprefix ../, $(wildcard src/*/*.c))
 cpp_source := $(addprefix ../, $(wildcard src/*/*.cpp))
-flags := -Wall -Wno-deprecated-declarations -O3
+flags := -Wno-deprecated-declarations -O3
 libs := -framework OpenGL -framework GLUT -lm
 
 # works on MacOS Mojave
@@ -25,4 +25,3 @@ clean:
 	rm -rfv *build* a1 a3
 
 .PHONY: a3 clean
-

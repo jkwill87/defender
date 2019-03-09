@@ -5,7 +5,6 @@
  */
 
 #include <math.h>
-
 #include "debug.h"
 #include "graphics.h"
 

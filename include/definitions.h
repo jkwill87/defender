@@ -1,5 +1,6 @@
 #pragma once
 
+
 // Constant Definitions --------------------------------------------------------
 
 // Configurable
@@ -7,6 +8,9 @@
 #define WORLD_XZ 100         // 50..150
 #define WORLD_Y 50           // 50..150
 #define LANDER_VISIBILITY 2  //  1..15
+#define LETHAL_FALL_HEIGHT 5 //  1..50
+#define LANDER_COUNT 11      //  1..25
+#define HUMAN_COUNT 10       //  1..25
 
 // Not so much...
 #define LASER_DIST (WORLD_XZ * 1.5f)

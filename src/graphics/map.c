@@ -1,5 +1,10 @@
-#include <math.h>
+/**
+ * map.c
+ *
+ * Logic for drawing 2d game map overlay.
+ */
 
+#include <math.h>
 #include "debug.h"
 #include "graphics.h"
 

@@ -1,8 +1,15 @@
-#include <algorithm>
-#include <random>
-#include <units.hpp>
+/**
+ * _unit.cpp
+ *
+ * The base unit class.
+ */
 
+
+#include <algorithm>
+#include <iostream>
+#include <random>
 #include "debug.h"
+#include "units.hpp"
 
 using namespace std;
 
@@ -55,10 +62,10 @@ byte Unit::cycle = 0;
 // Constructor Definitions -----------------------------------------------------
 
 Unit::Unit(int x, int y, int z, string name) :
-    id(units.size()),
+    id(units.size() + 1),
     target({x, max(y, WORLD_Y - MAP_CLEAR), z}),
     origin(target),
-    as_str(name + " id:" + to_string(units.size())) {
+    as_str(name + " #" + to_string(units.size())) {
     units.push_back(this);
     assert_gte(x, 0, "x out of bounds");
     assert_gte(y, 0, "y out of bounds");
@@ -167,7 +174,7 @@ void Unit::render() {
 }
 
 void Unit::shoot() {
-    log("%s shot down", as_str.c_str());
+    cout << as_str + " shot down" << endl;
     delete this;
 }
 

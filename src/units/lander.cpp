@@ -1,8 +1,12 @@
-#include <sstream>
-#include <units.hpp>
+/**
+ * lander.cpp
+ *
+ * Lander class derived from the Unit base class.
+ */
 
 
 #include "debug.h"
+#include "units.hpp"
 
 using namespace std;
 
@@ -25,7 +29,7 @@ Lander::Lander(int x, int y, int z) : Unit(x, y, z, "lander") {
     layout[{+1, +1, +0}] = COLOUR_GREEN;
     layout[{+0, +2, +0}] = COLOUR_YELLOW;
     origin.y = max(origin.y, calc_min_y() + MAP_CLEAR);
-    target = calc_random_coordinate(true);
+    new_search_path();
 }
 
 Lander::Lander(Coordinate coordinate) :
@@ -34,11 +38,16 @@ Lander::Lander(Coordinate coordinate) :
 
 Lander::Lander() : Lander(calc_random_coordinate()) {}
 
+Lander::~Lander() {
+    if (captive) captive->action_drop();
+    state = KILLED;
+}
+
 
 // Private Method Definitions --------------------------------------------------
 
 void Lander::look() {
-    if(state>=EXITED)return;
+    if (state >= EXITED)return;
     if (WORLD_Y - origin.y < 3) {
         state = EXITED;
         return;
@@ -66,12 +75,12 @@ void Lander::look() {
             for (idx.y = idx1.y; idx.y < idx2.y; idx.y++) {
                 if (world_units[idx.x][idx.y][idx.z]) {
                     auto human = dynamic_cast<Human *>(find_unit(idx));
-                    if(human)
-                    if (human->available) {
-                        state = PURSUING;
-                        captive = human;
-                        return;
-                    }
+                    if (human)
+                        if (human->available) {
+                            state = PURSUING;
+                            captive = human;
+                            return;
+                        }
                 }
             }
         }
@@ -90,7 +99,7 @@ void Lander::ai() {
                 origin.x <= MAP_CLEAR || origin.x >= WORLD_XZ - MAP_CLEAR ||
                 origin.z <= MAP_CLEAR || origin.z >= WORLD_XZ - MAP_CLEAR
                 ) {
-                action_restart_search();
+                new_search_path();
             }
             break;
         case PURSUING:
@@ -135,16 +144,10 @@ void Lander::render() {
     Unit::render();
 }
 
-void Lander::action_restart_search() {
+void Lander::new_search_path() {
     log("%s searching elsewhere", as_str.c_str());
-    log("%s searching elsewhere", as_str.c_str());
-    target = calc_random_coordinate(true);
+    target = calc_random_coordinate(true);  // along edge
     target.y = min(origin.y + 1, WORLD_Y - MAP_CLEAR);
     if (captive) captive->available = true;
     captive = nullptr;
-}
-
-Lander::~Lander() {
-    if (captive) captive->action_drop();
-    state = KILLED;
 }

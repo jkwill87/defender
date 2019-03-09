@@ -1,6 +1,10 @@
+/**
+ * human.cpp
+ *
+ * Human class derived from the Unit base class.
+ */
 
-#include <units.hpp>
-
+#include <iostream>
 #include "debug.h"
 #include "units.hpp"
 
@@ -33,14 +37,30 @@ Human::Human(Coordinate coordinate) :
 
 Human::Human() : Human(calc_random_coordinate()) {}
 
+Human::~Human() {
+    available = false;
+    state = KILLED;
+    Lander *lander;
+    for (auto unit: units) {
+        lander = dynamic_cast<Lander *>(unit);
+        if (lander && lander->captive == this) {
+            lander->new_search_path();
+        }
+    }
+}
+
 
 // Public Method Definitions ---------------------------------------------------
 
 void Human::ai() {
     switch (state) {
         case SETTLED:
-            if (fall_height >= MAP_CLEAR) {
+            if (fall_height >= LETHAL_FALL_HEIGHT) {
                 state = KILLED;
+                cout << as_str + " fell to their death" << endl;
+            } else if (fall_height) {
+                cout << as_str + " fell but they're ok" << endl;
+                fall_height = 0;
             }
             break;
         case FALLING:
@@ -90,16 +110,4 @@ void Human::action_capture() {
     log("%s captured", as_str.c_str());
     available = false;
     state = KILLED;
-}
-
-Human::~Human() {
-    available = false;
-    state = KILLED;
-    Lander * lander;
-    for (auto unit: units){
-        lander = dynamic_cast<Lander*>(unit);
-        if(lander && lander->captive==this){
-            lander->action_restart_search();
-        }
-    }
 }

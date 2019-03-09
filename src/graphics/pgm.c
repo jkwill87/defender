@@ -157,11 +157,10 @@ static void _settle_cubes() {
 static void _add_base_layer() {
     // add plane of cubes along bottom border
     #pragma omp parallel for collapse(2)
-    for (int x = 0; x < WORLD_XZ; x++) {
-        for (int z = 0; z < WORLD_XZ; z++) {
-            world_terrain[x][0][z] = COLOUR_BLACK;
-        }
-    }
+    for (int x = 0; x < WORLD_XZ; x++)
+        for (int z = 0; z < WORLD_XZ; z++)
+            if(!world_terrain[x][1][z])
+                world_terrain[x][0][z] = COLOUR_BLACK;
 }
 
 static void _cull_overlapping_cubes() {

@@ -124,11 +124,6 @@ coordinate Unit::calc_random_coordinate(bool edge) {
     return already_occupied ? calc_random_coordinate(edge) : coordinate;
 }
 
-void Unit::remove() {
-    const auto vec_addr = std::find(units.begin(), units.end(), this);
-    units.erase(vec_addr);
-}
-
 int Unit::y_distance(const Unit *target) {
     int distance = 0;
     if (target && origin.x == target->origin.x &&
@@ -173,6 +168,7 @@ void Unit::render() {
 
 void Unit::shoot() {
     log("%s shot down", as_str.c_str());
+    delete this;
 }
 
 bool Unit::is_occupying(Coordinate &pos) {

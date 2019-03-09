@@ -43,14 +43,13 @@ class Unit {
     protected:
     static byte calc_min_y();
     static coordinate calc_random_coordinate(bool edge = false);
-    void remove();
     int y_distance(const Unit *target);
 
     public:
     static Unit *find_unit(Coordinate coordinate);
     virtual void ai();
     virtual void render();
-    virtual void shoot();
+    void shoot();
     bool is_occupying(Coordinate &pos);
 };
 
@@ -85,13 +84,13 @@ class Human : public Unit {
     Human(int x, int y, int z);
     explicit Human(Coordinate coordinate);
     explicit Human();
+    ~Human();
 
     // Method Declarations  ----------------------------------------------------
 
     public:
     void ai() override;
     void render() override;
-    void shoot() override;
     void action_lift();
     void action_drop();
     void action_capture();
@@ -118,6 +117,8 @@ class Lander : public Unit {
 
     private:
     State state = SEARCHING;
+
+    public:
     Human *captive = nullptr;
 
     // Constructor Declarations ------------------------------------------------
@@ -126,6 +127,7 @@ class Lander : public Unit {
     Lander(int x, int y, int z);
     explicit Lander(Coordinate coordinate);
     explicit Lander();
+    ~Lander();
 
     // Method Declarations  ----------------------------------------------------
 
@@ -135,5 +137,5 @@ class Lander : public Unit {
     public:
     void ai() override;
     void render() override;
-    void shoot() override;
+    void action_restart_search();
 };

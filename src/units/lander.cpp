@@ -1,7 +1,8 @@
 #include <sstream>
+#include <units.hpp>
+
 
 #include "debug.h"
-#include "units.hpp"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ Lander::Lander() : Lander(calc_random_coordinate()) {}
 // Private Method Definitions --------------------------------------------------
 
 void Lander::look() {
+    if(state>=EXITED)return;
     if (WORLD_Y - origin.y < 3) {
         state = EXITED;
         return;
@@ -64,7 +66,8 @@ void Lander::look() {
             for (idx.y = idx1.y; idx.y < idx2.y; idx.y++) {
                 if (world_units[idx.x][idx.y][idx.z]) {
                     auto human = dynamic_cast<Human *>(find_unit(idx));
-                    if (human && human->available) {
+                    if(human)
+                    if (human->available) {
                         state = PURSUING;
                         captive = human;
                         return;
@@ -80,15 +83,14 @@ void Lander::look() {
 // Public Method Definitions ---------------------------------------------------
 
 void Lander::ai() {
+    look();
     switch (state) {
         case SEARCHING:
             if (
                 origin.x <= MAP_CLEAR || origin.x >= WORLD_XZ - MAP_CLEAR ||
                 origin.z <= MAP_CLEAR || origin.z >= WORLD_XZ - MAP_CLEAR
                 ) {
-                log("%s searching elsewhere", as_str.c_str());
-                target = calc_random_coordinate(true);
-                target.y = min(origin.y + 1, WORLD_Y - MAP_CLEAR);
+                action_restart_search();
             }
             break;
         case PURSUING:
@@ -107,15 +109,14 @@ void Lander::ai() {
             break;
         case EXITED:
             captive->action_capture();
-            remove();
             log("%s escaped", as_str.c_str());
+            delete this;
             return;
         case KILLED:
-            remove();
             log("%s killed", as_str.c_str());
+            delete this;
             return;
     }
-    look();
     Unit::ai();
 }
 
@@ -134,8 +135,16 @@ void Lander::render() {
     Unit::render();
 }
 
-void Lander::shoot() {
+void Lander::action_restart_search() {
+    log("%s searching elsewhere", as_str.c_str());
+    log("%s searching elsewhere", as_str.c_str());
+    target = calc_random_coordinate(true);
+    target.y = min(origin.y + 1, WORLD_Y - MAP_CLEAR);
+    if (captive) captive->available = true;
+    captive = nullptr;
+}
+
+Lander::~Lander() {
     if (captive) captive->action_drop();
     state = KILLED;
-    Unit::shoot();
 }

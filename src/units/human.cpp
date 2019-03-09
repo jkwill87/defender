@@ -1,3 +1,6 @@
+
+#include <units.hpp>
+
 #include "debug.h"
 #include "units.hpp"
 
@@ -53,7 +56,7 @@ void Human::ai() {
             assert_lte(target.y - 2, WORLD_Y, "out of bounds");
             break;
         case KILLED:
-            remove();
+            delete this;
             return;
     }
     Unit::ai();
@@ -68,12 +71,6 @@ void Human::render() {
         layout.swap(next_layout);
     }
     Unit::render();
-}
-
-void Human::shoot() {
-    available = false;
-    state = KILLED;
-    Unit::shoot();
 }
 
 void Human::action_lift() {
@@ -93,4 +90,16 @@ void Human::action_capture() {
     log("%s captured", as_str.c_str());
     available = false;
     state = KILLED;
+}
+
+Human::~Human() {
+    available = false;
+    state = KILLED;
+    Lander * lander;
+    for (auto unit: units){
+        lander = dynamic_cast<Lander*>(unit);
+        if(lander && lander->captive==this){
+            lander->action_restart_search();
+        }
+    }
 }

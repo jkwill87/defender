@@ -3,16 +3,15 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 3.6)
 
 PROJECT (a3)
+
 SET (CMAKE_C_STANDARD 99)
 SET (CMAKE_CXX_STANDARD 11)
 
 SET (CMAKE_C_FLAGS_DEBUG "-O0 -g -Wall -pedantic -fsanitize=address -fno-omit-frame-pointer")
 SET (CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -pedantic -fsanitize=address -fno-omit-frame-pointer")
 
-SET (CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
-SET (CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-
-SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+SET (CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+SET (CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 
 # Graphics Library Configuration -----------------------------------------------

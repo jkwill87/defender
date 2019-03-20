@@ -18,7 +18,6 @@ extern Config config;
 // Program Entrypoint ----------------------------------------------------------
 
 int main(int argc, char **argv) {
-
     // Parse CLI arguments
     for (int i = 1; i < argc; i++) {
         char *arg = argv[i];

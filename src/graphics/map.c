@@ -43,8 +43,7 @@ static void _set_2d_colour(Colour colour, float alpha) {
 // Function Definitions --------------------------------------------------------
 
 void map_pos_update() {
-    dim = config.screen_width > config.screen_height
-          ? config.screen_height
+    dim = config.screen_width > config.screen_height ? config.screen_height
           : config.screen_width;
     switch (config.map_mode) {
         default:
@@ -54,8 +53,8 @@ void map_pos_update() {
             break;
         case MAP_MINI:
             dim *= 0.25f;
-            pt_nw_x = (int) (config.screen_width - dim - 25);
-            pt_se_y = (int) (config.screen_height - dim - 25);
+            pt_nw_x = (int)(config.screen_width - dim - 25);
+            pt_se_y = (int)(config.screen_height - dim - 25);
             pt_se_x = config.screen_width - 25;
             pt_nw_y = config.screen_height - 25;
             alpha = 0.5f;
@@ -63,16 +62,16 @@ void map_pos_update() {
         case MAP_FULL:
             dim *= 0.8f;
             dim = dim > WORLD_XZ ? dim : WORLD_XZ;
-            pt_nw_x = (int) ((config.screen_width - dim) / 2);
-            pt_se_y = (int) ((config.screen_height - dim) / 2);
-            pt_se_x = (int) (config.screen_width -
-                             (config.screen_width - dim) / 2);
-            pt_nw_y = (int) (config.screen_height -
-                             (config.screen_height - dim) / 2);
+            pt_nw_x = (int)((config.screen_width - dim) / 2);
+            pt_se_y = (int)((config.screen_height - dim) / 2);
+            pt_se_x =
+                (int)(config.screen_width - (config.screen_width - dim) / 2);
+            pt_nw_y =
+                (int)(config.screen_height - (config.screen_height - dim) / 2);
             alpha = 0.25f;
             break;
     }
-    pt = dim / (float) WORLD_XZ;
+    pt = dim / (float)WORLD_XZ;
 }
 
 void map_mode_toggle() {
@@ -111,8 +110,9 @@ void map_terrain_layer() {
             map_height = y / (WORLD_Y + 1.0f) * 255 / 100.0f;
             px_y = pt_se_y + z * pt;
             _set_2d_material(
-                &((Material) {map_height, map_height, map_height, alpha / 2})
-            );
+            &((Material) {
+                map_height, map_height, map_height, alpha / 2
+            }));
             glVertex2f(px_x, px_y);
             glVertex2f(px_x + pt, px_y);
             glVertex2f(px_x + pt, px_y + pt);
@@ -166,9 +166,7 @@ void map_laser_layer() {
     glLineWidth(pt);
     _set_2d_colour(COLOUR_YELLOW, alpha * 1.5f);
     glVertex2f(p1_x, p1_y);
-    glVertex2f(
-        (GLfloat) fmax(fmin(pt_se_x, p2_x), pt_nw_x),
-        (GLfloat) fmax(fmin(pt_nw_y, p2_y), pt_se_y)
-    );
+    glVertex2f((GLfloat)fmax(fmin(pt_se_x, p2_x), pt_nw_x),
+               (GLfloat)fmax(fmin(pt_nw_y, p2_y), pt_se_y));
     glEnd();
 }

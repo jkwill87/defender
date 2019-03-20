@@ -49,31 +49,39 @@ static void _draw_cube(World *world, int x, int y, int z) {
 }
 
 static bool _cube_in_frustrum(float x, float y, float z, float n) {
-    for (int p = 0; p < 6; p++) {
-        if (f[p][0] * (x - n) + f[p][1] * (y - n) + f[p][2] * (z - n) +
-            f[p][3] > 0)
-            continue;
-        if (f[p][0] * (x + n) + f[p][1] * (y - n) + f[p][2] * (z - n) +
-            f[p][3] > 0)
-            continue;
-        if (f[p][0] * (x - n) + f[p][1] * (y + n) + f[p][2] * (z - n) +
-            f[p][3] > 0)
-            continue;
-        if (f[p][0] * (x + n) + f[p][1] * (y + n) + f[p][2] * (z - n) +
-            f[p][3] > 0)
-            continue;
-        if (f[p][0] * (x - n) + f[p][1] * (y - n) + f[p][2] * (z + n) +
-            f[p][3] > 0)
-            continue;
-        if (f[p][0] * (x + n) + f[p][1] * (y - n) + f[p][2] * (z + n) +
-            f[p][3] > 0)
-            continue;
-        if (f[p][0] * (x - n) + f[p][1] * (y + n) + f[p][2] * (z + n) +
-            f[p][3] > 0)
-            continue;
-        if (f[p][0] * (x + n) + f[p][1] * (y + n) + f[p][2] * (z + n) +
-            f[p][3] > 0)
-            continue;
+    for (int p = 0; p   < 6; p++) {
+        if (
+            f[p][0] * (x - n) + f[p][1]
+            * (y - n) + f[p][2] * (z - n) + f[p][3] > 0
+        ) continue;
+        if (
+            f[p][0] * (x + n) + f[p][1] * (y - n)
+            + f[p][2] * (z - n) + f[p][3] > 0
+        ) continue;
+        if (
+            f[p][0] * (x - n) + f[p][1] * (y + n)
+            + f[p][2] * (z - n) + f[p][3] > 0
+        ) continue;
+        if (
+            f[p][0] * (x + n) + f[p][1] * (y + n)
+            + f[p][2] * (z - n) + f[p][3] > 0
+        ) continue;
+        if (
+            f[p][0] * (x - n) + f[p][1] * (y - n)
+            + f[p][2] * (z + n) + f[p][3] > 0
+        ) continue;
+        if (
+            f[p][0] * (x + n) + f[p][1] * (y - n)
+            + f[p][2] * (z + n) + f[p][3] > 0
+        ) continue;
+        if (
+            f[p][0] * (x - n) + f[p][1] * (y + n)
+            + f[p][2] * (z + n) + f[p][3] > 0
+        ) continue;
+        if (
+            f[p][0] * (x + n) + f[p][1] * (y + n)
+            + f[p][2] * (z + n) + f[p][3] > 0
+        ) continue;
         return false;
     }
     return true;
@@ -93,10 +101,13 @@ static void _calc_line_of_sight() {
 }
 
 static void _laser_draw() {
-    double angle = 180.0f / PI * acos(laser.to.z / sqrt(
-        laser.to.x * laser.to.x + laser.to.y * laser.to.y +
-        laser.to.z * laser.to.z)
-    );
+    double angle =
+        180.0f / PI * acos(
+            laser.to.z / sqrt(
+                laser.to.x * laser.to.x + laser.to.y
+                * laser.to.y + laser.to.z * laser.to.z
+            )
+        );
     if (laser.to.z <= 0) {
         angle *= -1;
     }
@@ -105,9 +116,7 @@ static void _laser_draw() {
     glTranslatef(laser.from.x, laser.from.y, laser.from.z);
     glRotated(angle, -laser.to.y * laser.to.z, laser.to.x * laser.to.z, 0.0);
     glMaterialfv(
-        GL_FRONT,
-        GL_AMBIENT_AND_DIFFUSE,
-        *get_material(COLOUR_YELLOW)
+        GL_FRONT, GL_AMBIENT_AND_DIFFUSE, *get_material(COLOUR_YELLOW)
     );
     gluQuadricOrientation(quadric, GLU_OUTSIDE);
     gluCylinder(quadric, 0.25f, 0.25f, 100, 100, 1);
@@ -137,8 +146,7 @@ static void _draw_world() {
                 &world_terrain,
                 display_list[i][0],
                 display_list[i][1],
-                display_list[i][2]
-            );
+                display_list[i][2]);
         }
     }
 }
@@ -248,11 +256,10 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
     float length = (tx - bx) / 2.0f;
     if (length < 0) length *= -1;
     if (!_cube_in_frustrum(
-        bx + ((tx - bx) / 2),
-        by + ((ty - by) / 2),
-        bz + ((tz - bz) / 2),
-        length)
-        )
+                bx + ((tx - bx) / 2),
+                by + ((ty - by) / 2),
+                bz + ((tz - bz) / 2),
+                length))
         return;
     if (l != 1) {
         float new_centre_x, new_centre_y, new_centre_z;
@@ -282,17 +289,18 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
         }
         return;
     }
-    for (int x = (int) bx; x < tx + 1; x++) {
-        for (int y = (int) by; y < ty + 1; y++) {
-            for (int z = (int) bz; z < tz + 1; z++) {
-                if (x >= WORLD_XZ || y >= WORLD_Y || z >= WORLD_XZ)
-                    continue;
-                if (x <= -1 || y <= -1 || z <= -1 ||
-                    world_terrain[x][y][z] == 0)
-                    continue;
-                if (!_cube_in_frustrum(x + 0.5f, y + 0.5f, z + 0.5f, 0.5))
-                    continue;
-                if (!((x > 0 && (x < WORLD_XZ - 1) && y > 0 &&
+    for (int x = (int)bx; x < tx + 1; x++) {
+        for (int y = (int)by; y < ty + 1; y++) {
+            for (int z = (int)bz; z < tz + 1; z++) {
+                if (x >= WORLD_XZ || y >= WORLD_Y || z >= WORLD_XZ) continue;
+                if (
+                    x <= -1 || y <= -1 || z <= -1 || world_terrain[x][y][z] == 0
+                ) continue;
+                if (
+                    !_cube_in_frustrum(x + 0.5f, y + 0.5f, z + 0.5f, 0.5)
+                ) continue;
+                if (
+                    !((x > 0 && (x < WORLD_XZ - 1) && y > 0 &&
                        (y < WORLD_Y - 1) && z > 0 && (z < WORLD_XZ - 1) &&
                        (world_terrain[x + 1][y][z] == 0 ||
                         world_terrain[x - 1][y][z] == 0 ||
@@ -301,8 +309,8 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
                         world_terrain[x][y][z + 1] == 0 ||
                         world_terrain[x][y][z - 1] == 0)) ||
                       (x == 0 || x == WORLD_XZ - 1 || y == 0 ||
-                       y == WORLD_Y - 1 || z == 0 || z == WORLD_XZ - 1)))
-                    continue;
+                       y == WORLD_Y - 1 || z == 0 || z == WORLD_XZ - 1))
+                ) continue;
                 display_list[view.count][0] = x;
                 display_list[view.count][1] = y;
                 display_list[view.count][2] = z;

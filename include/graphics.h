@@ -2,9 +2,9 @@
 
 #ifdef __APPLE__
 
+#include <GLUT/glut.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
-#include <GLUT/glut.h>
 
 #else
 

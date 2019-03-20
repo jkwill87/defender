@@ -98,14 +98,14 @@ static unsigned _get_next_number(unsigned max) {
 static void _clear_terrain() {
     // clearout any existing cubes
     #pragma omp parallel for collapse(3)
-    for (byte x = 0; x < WORLD_XZ; x++)
-        for (byte y = 0; y < WORLD_Y; y++)
-            for (byte z = 0; z < WORLD_XZ; z++)
+    for (uint8 x = 0; x < WORLD_XZ; x++)
+        for (uint8 y = 0; y < WORLD_Y; y++)
+            for (uint8 z = 0; z < WORLD_XZ; z++)
                 world_terrain[x][y][z] = 0;
 }
 
-static bool _is_floating_block(byte x, byte y, byte z) {
-    byte pts = 0;
+static bool _is_floating_block(uint8 x, uint8 y, uint8 z) {
+    uint8 pts = 0;
     // block directly below
     if (world_terrain[x][y - 1][z]) pts += 4;
     // blocks below
@@ -126,15 +126,15 @@ static bool _is_floating_block(byte x, byte y, byte z) {
     if (x - 1 >= 0 && z + 1 < WORLD_XZ && world_terrain[x - 1][y - 1][z + 1])
         pts += 3;
     if (x + 1 < WORLD_XZ && z + 1 < WORLD_XZ &&
-        world_terrain[x + 1][y - 1][z + 1])
+            world_terrain[x + 1][y - 1][z + 1])
         pts += 3;
     if (x + 1 < WORLD_XZ && z - 1 >= 0 && world_terrain[x + 1][y - 1][z - 1])
         pts += 3;
     // blocks adjacent to
     if ((x - 1 > 0 && world_terrain[x - 1][y][z]) ||
-        (z - 1 > 0 && world_terrain[x][y][z - 1]) ||
-        (z + 1 < WORLD_XZ && world_terrain[x][y][z + 1]) ||
-        (x + 1 < WORLD_XZ && world_terrain[x + 1][y][z]))
+            (z - 1 > 0 && world_terrain[x][y][z - 1]) ||
+            (z + 1 < WORLD_XZ && world_terrain[x][y][z + 1]) ||
+            (x + 1 < WORLD_XZ && world_terrain[x + 1][y][z]))
         pts += 1;
     return pts < 4;
 }
@@ -145,9 +145,9 @@ static void _settle_cubes() {
     do {
         retry = false;
         #pragma omp parallel for
-        for (byte x = 0; x < WORLD_XZ; x++) {
-            for (byte y = WORLD_Y - 1; y > 1; y--) {
-                for (byte z = 0; z < WORLD_XZ; z++) {
+        for (uint8 x = 0; x < WORLD_XZ; x++) {
+            for (uint8 y = WORLD_Y - 1; y > 1; y--) {
+                for (uint8 z = 0; z < WORLD_XZ; z++) {
                     if (world_terrain[x][y][z] == 0) continue;
                     if (!_is_floating_block(x, y, z)) continue;
                     world_terrain[x][y][z] = COLOUR_NONE;
@@ -241,11 +241,11 @@ void pgm_set_world_terrain() {
     double y_scale = (y_max - 1) / (WORLD_Y - 1.0);
     double z_scale = (terrain.z - 1) / (WORLD_XZ - 1.0);
     double sx, sy, sz;
-    byte y;
+    uint8 y;
     // nearest neighbour interpolation
     #pragma omp parallel for
-    for (byte x = 0; x < WORLD_XZ; x++) {
-        for (byte z = 0; z < WORLD_XZ; z++) {
+    for (uint8 x = 0; x < WORLD_XZ; x++) {
+        for (uint8 z = 0; z < WORLD_XZ; z++) {
             sx = x * x_scale;
             assert_gte(sx, 0.0f, "sx value out of range");
             assert_lt(sx, terrain.x, "sx value out of range");
@@ -255,7 +255,7 @@ void pgm_set_world_terrain() {
             sy = pgm_get_y_value(sx, sz) / y_scale;
             assert_gte(sy, 0.0f, "sy value out of range");
             assert_lt(sy, WORLD_Y, "sy value out of range");
-            y = (byte) sy;
+            y = (uint8) sy;
             world_terrain[x][y][z] = COLOUR_BLACK;
         }
     }

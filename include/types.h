@@ -1,14 +1,14 @@
 #pragma once
 
-#include <stdbool.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include "definitions.h"
 
 
 // Type Declarations -----------------------------------------------------------
 
-typedef uint_fast8_t byte;
-typedef byte World[WORLD_XZ][WORLD_Y][WORLD_XZ];
+typedef uint_fast8_t uint8;
+typedef uint8 World[WORLD_XZ][WORLD_Y][WORLD_XZ];
 typedef float Material[4];
 
 
@@ -25,7 +25,7 @@ typedef enum colour {
     COLOUR_GREEN,
     COLOUR_ORANGE,
     COLOUR_RED,
-    COLOUR_YELLOW
+    COLOUR_YELLOW,
 } Colour;
 
 typedef enum direction {
@@ -33,13 +33,13 @@ typedef enum direction {
     DIRECTION_FORWARD,
     DIRECTION_BACK,
     DIRECTION_LEFT,
-    DIRECTION_RIGHT
+    DIRECTION_RIGHT,
 } Direction;
 
 typedef enum map_mode {
     MAP_HIDDEN = 0,
     MAP_MINI,
-    MAP_FULL
+    MAP_FULL,
 } MapMode;
 
 typedef struct config {

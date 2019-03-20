@@ -22,7 +22,7 @@ extern World world_units;
 
 // Static Function Definitions -------------------------------------------------
 
-static byte _calc_y_min(int x, int z) {
+static uint8 _calc_y_min(int x, int z) {
     static int minimums[WORLD_XZ][WORLD_XZ] = {{-1}};
     static bool calculated = false;  // only need to compute once
     if (!calculated) {
@@ -39,24 +39,24 @@ static byte _calc_y_min(int x, int z) {
             }
         }
     }
-    return static_cast<byte>(minimums[x][z]);
+    return static_cast<uint8>(minimums[x][z]);
 }
 
-static byte _gen_random(int min, int max) {
+static uint8 _gen_random(int min, int max) {
     static random_device rd;
     static mt19937 seed(rd());
     uniform_int_distribution<> distribution(min, max);
     int result = distribution(seed);
     assert_gte(result, 0, "underflow imminent");
     assert_lte(result, 255, "overflow imminent");
-    return static_cast<byte>(result);
+    return static_cast<uint8>(result);
 }
 
 
 // Static Variable Definitions -------------------------------------------------
 
 vector<Unit *> Unit::units;
-byte Unit::cycle = 0;
+uint8 Unit::cycle = 0;
 
 
 // Constructor Definitions -----------------------------------------------------
@@ -64,8 +64,10 @@ byte Unit::cycle = 0;
 Unit::Unit(int x, int y, int z, string name) :
     id(units.size() + 1),
     target({x, max(y, WORLD_Y - MAP_CLEAR), z}),
-    origin(target),
-    as_str(name + " #" + to_string(units.size())) {
+       origin(target),
+       as_str(name + " #" + to_string(units.size())),
+       is_colliding_ground(false),
+is_colliding_unit(false) {
     units.push_back(this);
     assert_gte(x, 0, "x out of bounds");
     assert_gte(y, 0, "y out of bounds");
@@ -89,13 +91,13 @@ Unit::~Unit() {
 
 // Protected Method Definitions ------------------------------------------------
 
-byte Unit::calc_min_y() {
-    static byte y_min = 0;
+uint8 Unit::calc_min_y() {
+    static uint8 y_min = 0;
     if (y_min) return y_min;  // only needs to be calculated once
     for (int x = 0; x < WORLD_XZ; x++) {
         for (int z = 0; z < WORLD_XZ; z++) {
             for (int y = y_min + 1; y < WORLD_Y; y++) {
-                if (world_terrain[x][y][x]) y_min = static_cast<byte>(y);
+                if (world_terrain[x][y][x]) y_min = static_cast<uint8>(y);
                 break;
             }
         }
@@ -104,9 +106,9 @@ byte Unit::calc_min_y() {
 }
 
 coordinate Unit::calc_random_coordinate(bool edge) {
-    byte x = _gen_random(MAP_CLEAR, WORLD_XZ - MAP_CLEAR);
-    byte z = _gen_random(MAP_CLEAR, WORLD_XZ - MAP_CLEAR);
-    byte y = _gen_random(_calc_y_min(x, z) + MAP_CLEAR, WORLD_Y - MAP_CLEAR);
+    uint8 x = _gen_random(MAP_CLEAR, WORLD_XZ - MAP_CLEAR);
+    uint8 z = _gen_random(MAP_CLEAR, WORLD_XZ - MAP_CLEAR);
+    uint8 y = _gen_random(_calc_y_min(x, z) + MAP_CLEAR, WORLD_Y - MAP_CLEAR);
     Coordinate coordinate = {x, y, z};
     if (edge) {
         switch (_gen_random(0, 4)) {
@@ -134,8 +136,8 @@ coordinate Unit::calc_random_coordinate(bool edge) {
 int Unit::y_distance(const Unit *target) {
     int distance = 0;
     if (target && origin.x == target->origin.x &&
-        origin.z == target->origin.z &&
-        origin.y > target->origin.y) {
+            origin.z == target->origin.z &&
+            origin.y > target->origin.y) {
         return origin.y - target->origin.y;
     }
     return distance;
@@ -164,11 +166,17 @@ void Unit::ai() {
 
 void Unit::render() {
     for (auto const &mapping : layout) {
+        // Determine colour
+        Colour colour = mapping.second;
+        // Determine position
         PositionArray positions = mapping.first;
         int x = origin.x + positions[0];
         int y = origin.y + positions[1];
         int z = origin.z + positions[2];
-        Colour colour = mapping.second;
+        // Determine if colliding
+        if (world_units[x][y][z]) is_colliding_unit = true;
+        else if (world_terrain[x][y][z])is_colliding_ground = true;
+        // Draw unit
         world_units[x][y][z] = colour;
     }
 }

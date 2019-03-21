@@ -22,26 +22,6 @@ extern World world_units;
 
 // Static Function Definitions -------------------------------------------------
 
-static uint8 _calc_y_min(int x, int z) {
-    static int minimums[WORLD_XZ][WORLD_XZ] = {{-1}};
-    static bool calculated = false;  // only need to compute once
-    if (!calculated) {
-        Coordinate c;
-        for (c.x = 0; c.x >= WORLD_XZ; c.x++) {
-            for (c.z = 0; c.z >= WORLD_XZ; c.z++) {
-                for (c.y = WORLD_Y - 1; c.y >= 0; c.y--) {
-                    if (world_terrain[c.x][c.y][c.z]) {
-                        minimums[c.x][c.z] = c.y;
-                        break;
-                    }
-                    assert_gt(minimums[c.x][c.z], -1, "couldn't determine min");
-                }
-            }
-        }
-    }
-    return static_cast<uint8>(minimums[x][z]);
-}
-
 static uint8 _gen_random(int min, int max) {
     static random_device rd;
     static mt19937 seed(rd());
@@ -63,11 +43,11 @@ uint8 Unit::cycle = 0;
 
 Unit::Unit(int x, int y, int z, string name) :
     id(units.size() + 1),
+    is_colliding_ground(false),
+    is_colliding_unit(false),
     target({x, max(y, WORLD_Y - MAP_CLEAR), z}),
-       origin(target),
-       as_str(name + " #" + to_string(units.size())),
-       is_colliding_ground(false),
-is_colliding_unit(false) {
+    origin(target),
+    as_str(name + " #" + to_string(units.size())) {
     units.push_back(this);
     assert_gte(x, 0, "x out of bounds");
     assert_gte(y, 0, "y out of bounds");
@@ -91,24 +71,42 @@ Unit::~Unit() {
 
 // Protected Method Definitions ------------------------------------------------
 
+
+uint8 Unit::calc_min_y(int x, int z) {
+    static int minimums[WORLD_XZ][WORLD_XZ] = {{-1}};
+    static bool calculated = false;  // only need to compute once
+    if (!calculated) {
+        Coordinate c;
+        for (c.x = 0; c.x < WORLD_XZ; c.x++) {
+            for (c.z = 0; c.z < WORLD_XZ; c.z++) {
+                for (c.y = WORLD_Y - 1; c.y >= 0; c.y--) {
+                    if (world_terrain[c.x][c.y][c.z]) {
+                        minimums[c.x][c.z] = c.y;
+                        break;
+                    }
+                }
+                assert_gt(minimums[c.x][c.z], -1, "couldn't determine min");
+            }
+        }
+        calculated=true;
+    }
+    return static_cast<uint8>(minimums[x][z]);
+}
+
+
 uint8 Unit::calc_min_y() {
     static uint8 y_min = 0;
     if (y_min) return y_min;  // only needs to be calculated once
-    for (int x = 0; x < WORLD_XZ; x++) {
-        for (int z = 0; z < WORLD_XZ; z++) {
-            for (int y = y_min + 1; y < WORLD_Y; y++) {
-                if (world_terrain[x][y][x]) y_min = static_cast<uint8>(y);
-                break;
-            }
-        }
-    }
+    for (int x = 0; x < WORLD_XZ; x++)
+        for (int z = 0; z < WORLD_XZ; z++)
+            y_min = max(y_min,calc_min_y(x,z));
     return y_min;
 }
 
 coordinate Unit::calc_random_coordinate(bool edge) {
     uint8 x = _gen_random(MAP_CLEAR, WORLD_XZ - MAP_CLEAR);
     uint8 z = _gen_random(MAP_CLEAR, WORLD_XZ - MAP_CLEAR);
-    uint8 y = _gen_random(_calc_y_min(x, z) + MAP_CLEAR, WORLD_Y - MAP_CLEAR);
+    uint8 y = _gen_random(calc_min_y(x, z), WORLD_Y - MAP_CLEAR);
     Coordinate coordinate = {x, y, z};
     if (edge) {
         switch (_gen_random(0, 4)) {
@@ -156,6 +154,12 @@ Unit *Unit::find_unit(Coordinate coordinate) {
 }
 
 void Unit::ai() {
+    target.x = max(target.x,MAP_CLEAR);
+    target.x = min(target.x,WORLD_XZ-MAP_CLEAR);
+    target.y = max(target.y,MAP_CLEAR);
+    target.y = min(target.y,WORLD_Y-MAP_CLEAR);
+    target.z = max(target.z,MAP_CLEAR);
+    target.z = min(target.z,WORLD_XZ-MAP_CLEAR);
     if (origin.x - target.x < 0) origin.x++;
     else if (origin.x - target.x > 0) origin.x--;
     if (origin.y - target.y < 0) origin.y++;
@@ -165,6 +169,8 @@ void Unit::ai() {
 }
 
 void Unit::render() {
+    is_colliding_ground=false;
+    is_colliding_unit=false;
     for (auto const &mapping : layout) {
         // Determine colour
         Colour colour = mapping.second;
@@ -174,8 +180,8 @@ void Unit::render() {
         int y = origin.y + positions[1];
         int z = origin.z + positions[2];
         // Determine if colliding
-        if (world_units[x][y][z]) is_colliding_unit = true;
-        else if (world_terrain[x][y][z])is_colliding_ground = true;
+        if (world_terrain[x][y][z])is_colliding_ground = true;
+        else if (world_units[x][y][z]) is_colliding_unit = true;
         // Draw unit
         world_units[x][y][z] = colour;
     }

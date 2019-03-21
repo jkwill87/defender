@@ -48,6 +48,7 @@ typedef struct config {
     bool full_screen;
     bool show_fps;
     bool test_world;
+    bool overhead_view;
     int screen_height;
     int screen_width;
     enum map_mode map_mode;

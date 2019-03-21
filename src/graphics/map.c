@@ -135,7 +135,7 @@ void map_player_layer() {
 }
 
 void map_npc_layer() {
-    float px_size = pt * 2;
+    float px_size = pt * 1.5f;
     float px_x, px_y;
     for (int z = 0; z < WORLD_XZ; z++) {
         for (int x = 0; x < WORLD_XZ; x++) {
@@ -145,7 +145,7 @@ void map_npc_layer() {
                 px_x = pt_se_x - x * pt;
                 px_y = pt_nw_y - z * pt;
                 glBegin(GL_QUADS);
-                _set_2d_colour(COLOUR_GREEN, alpha * 1.5f);
+                _set_2d_colour(COLOUR_GREEN, .125f + (float)(WORLD_Y-y)/WORLD_Y);
                 glVertex2f(px_x - px_size, px_y - px_size);
                 glVertex2f(px_x + px_size, px_y - px_size);
                 glVertex2f(px_x + px_size, px_y + px_size);

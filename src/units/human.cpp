@@ -44,7 +44,7 @@ Human::~Human() {
     for (auto unit: units) {
         lander = dynamic_cast<Lander *>(unit);
         if (lander && lander->captive == this) {
-            lander->abandon_release();
+            lander->abandon_captive();
         }
     }
 }

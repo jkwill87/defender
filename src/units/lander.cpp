@@ -28,7 +28,7 @@ Lander::Lander(int x, int y, int z) : Unit(x, y, z, "lander") {
     layout[ {-1, +1, +0}] = COLOUR_GREEN;
     layout[ {+1, +1, +0}] = COLOUR_GREEN;
     layout[ {+0, +2, +0}] = COLOUR_YELLOW;
-    origin.y = max(origin.y, calc_min_y() + MAP_CLEAR);
+    origin.y = min(origin.y,(int)calc_min_y());
     new_search_path();
 }
 
@@ -49,9 +49,9 @@ Lander::~Lander() {
 
 void Lander::new_search_path() {
     log("%s searching elsewhere", as_str.c_str());
+    abandon_captive();
     target = calc_random_coordinate(true);  // along edge
-    target.y = min(origin.y + 1, WORLD_Y - MAP_CLEAR);
-    abandon_release();
+    target.y = origin.y;
 }
 
 void Lander::set_captive(Human *human) {
@@ -87,14 +87,25 @@ void Lander::action_search() {
         new_search_path();
 }
 
+void Lander::action_bounce_ground() {
+    origin.y++;
+    target.y+=5;
+}
+
+void Lander::action_bounce_unit() {
+    target.x = WORLD_XZ-target.x;
+    target.z = WORLD_XZ-target.z;
+    target.y++;
+}
+
 void Lander::action_pursue() {
     target.x = captive->origin.x;
     target.z = captive->origin.z;
-    target.y = min(captive->origin.y + MAP_CLEAR, WORLD_Y - MAP_CLEAR);
+    target.y = captive->origin.y + MAP_CLEAR;
 }
 
 void Lander::action_capture() {
-    target.y = min(captive->origin.y + MAP_CLEAR, WORLD_Y - MAP_CLEAR);
+    target.y = captive->origin.y + MAP_CLEAR;
 }
 
 void Lander::action_escape() {
@@ -106,7 +117,7 @@ void Lander::action_escape() {
 void Lander::action_exit() {
     log("%s escaped with %s", as_str.c_str(), captive->as_str.c_str());
     captive->action_capture();
-    abandon_release();
+    abandon_captive();
     delete this;
 }
 
@@ -122,7 +133,7 @@ void Lander::action_kill() {
 // Deciders
 bool Lander::can_escape() {
     int captive_distance = y_distance(captive);
-    return captive_distance > 0 && captive_distance < MAP_CLEAR * 2;
+    return captive && captive_distance > 0 && captive_distance < MAP_CLEAR * 2;
 }
 
 bool Lander::can_capture() {
@@ -157,7 +168,7 @@ bool Lander::can_shoot_player() {
 }
 
 bool Lander::can_exit() {
-    return WORLD_Y - origin.y < 3;
+    return captive && WORLD_Y - origin.y < 3;
 }
 
 
@@ -170,9 +181,11 @@ void Lander::ai() {
             break;
         case HITTING_UNIT:
             log("%s hitting unit", as_str.c_str());
+            action_bounce_unit();
             break;
         case HITTING_GROUND:
             log("%s hitting ground", as_str.c_str());
+            action_bounce_ground();
             break;
         case PURSUING:
             action_pursue();
@@ -212,6 +225,6 @@ void Lander::render() {
     Unit::render();
 }
 
-void Lander::abandon_release() {
+void Lander::abandon_captive() {
     captive = nullptr;
 }

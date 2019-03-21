@@ -1,8 +1,10 @@
-*build*
+!CMakeLists.txt
 .DS_Store
 .idea
 .vscode
+*build*
 a*
+CMake*
+cmake*
 compile_commands.json
 tags
-CMakeFiles/

@@ -5,6 +5,7 @@
  */
 
 #include <ctype.h>
+#include <time.h>
 #include <unistd.h>
 #include "debug.h"
 
@@ -62,7 +63,7 @@ static char *_load_file(const char *filename) {
 }
 
 static bool _is_eof() {
-    return current_char == last_char || *current_char == '\0';
+    return current_char==last_char || *current_char=='\0';
 }
 
 static void _skip_line() {
@@ -70,7 +71,7 @@ static void _skip_line() {
 }
 
 static void _skip_comment_line() {
-    while (*current_char == '#') _skip_line();
+    while (*current_char=='#') _skip_line();
 }
 
 static void _skip_whitespace() {
@@ -82,7 +83,7 @@ static unsigned _get_next_number(unsigned max) {
     _skip_whitespace();
     char n[PGM_MAX_DIGITS] = {'\0'};
     char c = '\0';
-    for (int i = 0; i < PGM_MAX_DIGITS; i++) {
+    for (int i = 0; i<PGM_MAX_DIGITS; i++) {
         c = *(current_char++);
         if (!isdigit(c)) break;
         n[i] = c;
@@ -90,18 +91,33 @@ static unsigned _get_next_number(unsigned max) {
     long rval = atol(n);
     assert_ok(c, "no number to parse");
     assert_ok(!isdigit(c), "parsed value exceeds PGM_MAX_DIGITS");
-    assert_ok(rval >= 0, "value could not be parsed");
-    assert_ok(!max || rval <= max, "parsed value out of range");
+    assert_ok(rval>=0, "value could not be parsed");
+    assert_ok(!max || rval<=max, "parsed value out of range");
     return (unsigned) rval;
 }
 
 static void _clear_terrain() {
     // clearout any existing cubes
     #pragma omp parallel for collapse(3)
-    for (uint8 x = 0; x < WORLD_XZ; x++)
-        for (uint8 y = 0; y < WORLD_Y; y++)
-            for (uint8 z = 0; z < WORLD_XZ; z++)
+    for (uint8 x = 0; x<WORLD_XZ; x++)
+        for (uint8 y = 0; y<WORLD_Y; y++)
+            for (uint8 z = 0; z<WORLD_XZ; z++)
                 world_terrain[x][y][z] = 0;
+}
+
+static void _shuffle(uint8* a, uint8 n) {
+    static bool first_call = true;
+    if (!first_call) {
+        srand((unsigned)time(NULL));
+        first_call=false;
+    }
+    for (int i = 0; i<n; i++) a[i]=i;
+    for (int i = 0; i<n-1; i++) {
+        int j = i + rand() / (RAND_MAX / (n - i) + 1);
+        int t = a[j];
+        a[j] = a[i];
+        a[i] = t;
+    }
 }
 
 static bool _is_floating_block(uint8 x, uint8 y, uint8 z) {
@@ -111,10 +127,6 @@ static bool _is_floating_block(uint8 x, uint8 y, uint8 z) {
     // blocks below
     if (y - 1 >= 0 && world_terrain[x][y - 1][z])
         pts += 3;
-    else if (y - 2 >= 0 && world_terrain[x][y - 2][z])
-        pts += 2;
-    else if (y - 3 >= 0 && world_terrain[x][y - 3][z])
-        pts += 1;
     // blocks underneath and offset
     if (x - 1 >= 0 && world_terrain[x - 1][y - 1][z]) pts += 4;
     if (x + 1 < WORLD_XZ && world_terrain[x + 1][y - 1][z]) pts += 4;
@@ -122,36 +134,41 @@ static bool _is_floating_block(uint8 x, uint8 y, uint8 z) {
     if (z + 1 < WORLD_XZ && world_terrain[x][y - 1][z + 1]) pts += 4;
     // blocks underneath diagonally
     if (x - 1 >= 0 && z - 1 >= 0 && world_terrain[x - 1][y - 1][z - 1])
-        pts += 3;
+        pts += 4;
     if (x - 1 >= 0 && z + 1 < WORLD_XZ && world_terrain[x - 1][y - 1][z + 1])
-        pts += 3;
+        pts += 4;
     if (x + 1 < WORLD_XZ && z + 1 < WORLD_XZ &&
             world_terrain[x + 1][y - 1][z + 1])
-        pts += 3;
+        pts += 4;
     if (x + 1 < WORLD_XZ && z - 1 >= 0 && world_terrain[x + 1][y - 1][z - 1])
-        pts += 3;
+        pts += 4;
     // blocks adjacent to
     if ((x - 1 > 0 && world_terrain[x - 1][y][z]) ||
             (z - 1 > 0 && world_terrain[x][y][z - 1]) ||
             (z + 1 < WORLD_XZ && world_terrain[x][y][z + 1]) ||
             (x + 1 < WORLD_XZ && world_terrain[x + 1][y][z]))
-        pts += 1;
+        pts += 2;
     return pts < 4;
 }
 
 static void _settle_cubes() {
-    // drop cubes without neighbors to minimize gaps
+    // drop cubes without neighbours to minimize gaps
     bool retry;
+    uint8 xi[WORLD_XZ], zi[WORLD_XZ];
     do {
         retry = false;
+        _shuffle(xi,WORLD_XZ);
+        _shuffle(zi,WORLD_XZ);
         #pragma omp parallel for
-        for (uint8 x = 0; x < WORLD_XZ; x++) {
-            for (uint8 y = WORLD_Y - 1; y > 1; y--) {
-                for (uint8 z = 0; z < WORLD_XZ; z++) {
-                    if (world_terrain[x][y][z] == 0) continue;
+        for (uint8 x = 0; x<WORLD_XZ; x++) {
+            for (uint8 z = 0; z<WORLD_XZ; z++) {
+                for (uint8 y = WORLD_Y-1; y>1; y--) {
+                    x=xi[x];
+                    z=zi[z];
+                    if (world_terrain[x][y][z]==COLOUR_NONE) continue;
                     if (!_is_floating_block(x, y, z)) continue;
                     world_terrain[x][y][z] = COLOUR_NONE;
-                    world_terrain[x][y - 1][z] = COLOUR_BLACK;
+                    world_terrain[x][y-1][z] = COLOUR_BLACK;
                     retry = true;
                 }
             }
@@ -162,8 +179,8 @@ static void _settle_cubes() {
 static void _add_base_layer() {
     // add plane of cubes along bottom border
     #pragma omp parallel for collapse(2)
-    for (int x = 0; x < WORLD_XZ; x++)
-        for (int z = 0; z < WORLD_XZ; z++)
+    for (int x = 0; x<WORLD_XZ; x++)
+        for (int z = 0; z<WORLD_XZ; z++)
             if (!world_terrain[x][1][z])
                 world_terrain[x][0][z] = COLOUR_BLACK;
 }
@@ -172,10 +189,10 @@ static void _cull_overlapping_cubes() {
     // limit 1 cube to x/z coordinate
     bool ceil;
     #pragma omp parallel for collapse(2)
-    for (int x = 0; x < WORLD_XZ; x++) {
-        for (int z = 0; z < WORLD_XZ; z++) {
+    for (int x = 0; x<WORLD_XZ; x++) {
+        for (int z = 0; z<WORLD_XZ; z++) {
             ceil = false;
-            for (int y = WORLD_Y - 1; y >= 0; y--) {
+            for (int y = WORLD_Y-1; y>=0; y--) {
                 if (world_terrain[x][y][z] != COLOUR_BLACK)
                     continue;
                 else if (!ceil)
@@ -186,7 +203,6 @@ static void _cull_overlapping_cubes() {
         }
     }
 }
-
 
 // Public Function Definitions -------------------------------------------------
 
@@ -207,7 +223,7 @@ void pgm_init(const char *filename) {
     unsigned datum_counter = 0;
     do {
         terrain.data[datum_counter++] = _get_next_number(y);
-    } while (datum_counter < z * x);
+    } while (datum_counter<z*x);
     // verify eof
     _skip_whitespace();
     assert_ok(_is_eof(), "unexpected data at end of file");
@@ -215,21 +231,21 @@ void pgm_init(const char *filename) {
 }
 
 unsigned pgm_get_y_value(double x, double z) {
-    int i = (int) (z * terrain.z + x);
+    int i = (int) (z*terrain.z+x);
     assert_lt(x, terrain.x, "x value out of range");
     assert_lt(z, terrain.z, "z value out of range");
-    assert_lt(i, terrain.x * terrain.z, "index out of range");
+    assert_lt(i, terrain.x*terrain.z, "index out of range");
     return (unsigned) terrain.data[i];
 }
 
 unsigned pgm_calc_ceil() {
     float ceil = 0;
-    for (int i = 0; i < terrain.x * terrain.z; i++) {
-        if (terrain.data[i] > ceil) {
+    for (int i = 0; i<terrain.x*terrain.z; i++) {
+        if (terrain.data[i]>ceil) {
             ceil = terrain.data[i];
         }
     }
-    ceil += ceil * 0.1f;
+    ceil+=ceil*0.1f;
     assert_gte(ceil, 0.0f, "ceil underflow imminent");
     return (unsigned) ceil;
 }
@@ -237,19 +253,19 @@ unsigned pgm_calc_ceil() {
 void pgm_set_world_terrain() {
     _clear_terrain();
     unsigned y_max = pgm_calc_ceil();
-    double x_scale = (terrain.x - 1) / (WORLD_XZ - 1.0);
-    double y_scale = (y_max - 1) / (WORLD_Y - 1.0);
-    double z_scale = (terrain.z - 1) / (WORLD_XZ - 1.0);
+    double x_scale = (terrain.x-1) / (WORLD_XZ-1.0);
+    double y_scale = (y_max-1) / (WORLD_Y-1.0);
+    double z_scale = (terrain.z-1) / (WORLD_XZ-1.0);
     double sx, sy, sz;
     uint8 y;
     // nearest neighbour interpolation
     #pragma omp parallel for
-    for (uint8 x = 0; x < WORLD_XZ; x++) {
-        for (uint8 z = 0; z < WORLD_XZ; z++) {
-            sx = x * x_scale;
+    for (uint8 x = 0; x<WORLD_XZ; x++) {
+        for (uint8 z = 0; z<WORLD_XZ; z++) {
+            sx = x*x_scale;
             assert_gte(sx, 0.0f, "sx value out of range");
             assert_lt(sx, terrain.x, "sx value out of range");
-            sz = z * z_scale;
+            sz = z*z_scale;
             assert_gte(sz, 0.0f, "sz value out of range");
             assert_lt(sz, terrain.z, "sz value out of range");
             sy = pgm_get_y_value(sx, sz) / y_scale;

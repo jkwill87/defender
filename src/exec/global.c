@@ -14,6 +14,7 @@ Config config = {
     .fly_control = false,
     .full_screen = false,
     .map_mode = MAP_MINI,
+    .overhead_view=false,
     .screen_height = 720,
     .screen_width = 1280,
     .show_fps = false,
@@ -34,9 +35,9 @@ Pgm terrain = {
 };
 
 Position player_pos = {
-    .x = -20,
-    .y = -25,
-    .z = -45
+    .x = -1*WORLD_XZ/2,
+    .y = -1*WORLD_Y+MAP_CLEAR,
+    .z = -1*WORLD_XZ/2
 };
 
 GlutHooks glut_hooks = {

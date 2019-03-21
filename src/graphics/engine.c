@@ -152,13 +152,10 @@ static void _draw_world() {
 }
 
 static void _draw_units() {
-    for (int x = 0; x < WORLD_XZ; x++) {
-        for (int y = 0; y < WORLD_Y; y++) {
-            for (int z = 0; z < WORLD_XZ; z++) {
+    for (int x = 0; x < WORLD_XZ; x++)
+        for (int y = 0; y < WORLD_Y; y++)
+            for (int z = 0; z < WORLD_XZ; z++)
                 _draw_cube(&world_units, x, y, z);
-            }
-        }
-    }
 }
 
 // Function Definitions --------------------------------------------------------
@@ -210,9 +207,16 @@ void glut_hook_default__display() {
     view.count = 0;
     glClear(GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    glRotatef(view.cam_x, 1.0, 0.0, 0.0);
-    glRotatef(view.cam_y, 0.0, 1.0, 0.0);
-    glTranslatef(player_pos.x, player_pos.y, player_pos.z);
+    if (config.overhead_view) {
+        glRotatef(90.0, 1.0, 0.0, 0.0);
+        glRotatef(0.0, 0.0, 1.0, 0.0);
+        glRotatef(0.0, 0.0, 0.0, 1.0);
+        glTranslatef(-1.0f * WORLD_XZ/2, -3 * WORLD_Y, -1.0f * WORLD_XZ/2);
+    } else {
+        glRotatef(view.cam_x, 1.0, 0.0, 0.0);
+        glRotatef(view.cam_y, 0.0, 1.0, 0.0);
+        glTranslatef(player_pos.x, player_pos.y, player_pos.z);
+    }
     viewpoint_light[0] = -player_pos.x;
     viewpoint_light[1] = -player_pos.y;
     viewpoint_light[2] = -player_pos.z;
@@ -225,7 +229,7 @@ void glut_hook_default__display() {
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, *get_material(COLOUR_GREY3));
     glPushMatrix();
     glTranslatef(WORLD_XZ / 2.0f, WORLD_Y / 2.0f, WORLD_XZ / 2.0f);
-    glutSolidCube(WORLD_XZ);
+    glutSolidCube(WORLD_XZ*4.0f);
     glPopMatrix();
     glShadeModel(GL_SMOOTH);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, *get_material(COLOUR_BLACK));

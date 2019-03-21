@@ -43,6 +43,7 @@ class Unit {
 
   protected:
     static uint8 calc_min_y();
+    static uint8 calc_min_y(int x, int z);
     static coordinate calc_random_coordinate(bool edge = false);
     int y_distance(const Unit *target);
 
@@ -135,6 +136,8 @@ class Lander : public Unit {
 
     // Actions
     void action_search();
+    void action_bounce_ground();
+    void action_bounce_unit();
     void action_pursue();
     void action_capture();
     void action_escape();
@@ -150,7 +153,7 @@ class Lander : public Unit {
     bool can_shoot_player();
 
   public:
-    void abandon_release();
+    void abandon_captive();
     void ai() override;
     void render() override;
 };

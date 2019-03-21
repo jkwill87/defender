@@ -19,9 +19,9 @@ extern World world_terrain;
 // Constructor Definitions -----------------------------------------------------
 
 Human::Human(int x, int y, int z) : Unit(x, y, z, "human") {
-    layout[ {+0, -1, +0}] = COLOUR_GREEN;
-    layout[ {+0, +0, +0}] = COLOUR_RED;
-    layout[ {+0, +1, +0}] = COLOUR_ORANGE;
+    layout[{+0, -1, +0}] = COLOUR_GREEN;
+    layout[{+0, +0, +0}] = COLOUR_RED;
+    layout[{+0, +1, +0}] = COLOUR_ORANGE;
     terrain_height = 2;
     for (; y > 2; y--) {
         if (world_terrain[x][y][z]) {
@@ -85,9 +85,9 @@ void Human::ai() {
 void Human::render() {
     if (state == FLOATING) {
         Layout next_layout;
-        next_layout[ {+0, -1, +0}] = layout[ {+0, +0, +0}];
-        next_layout[ {+0, +0, +0}] = layout[ {+0, +1, +0}];
-        next_layout[ {+0, +1, +0}] = layout[ {+0, -1, +0}];
+        next_layout[{+0, -1, +0}] = layout[{+0, +0, +0}];
+        next_layout[{+0, +0, +0}] = layout[{+0, +1, +0}];
+        next_layout[{+0, +1, +0}] = layout[{+0, -1, +0}];
         layout.swap(next_layout);
     }
     Unit::render();

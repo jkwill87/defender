@@ -20,7 +20,7 @@ extern World world_terrain;
 
 static Coordinate pos_to_coord(Position pos) {
     return (Coordinate) {
-        (int)pos.x, (int)pos.y, (int)pos.z
+        (int) pos.x, (int) pos.y, (int) pos.z
     };
 }
 
@@ -149,7 +149,7 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 'q':
         case 27:
-            log("exiting");
+        log("exiting");
             unit_rm_all();
             glutDestroyWindow(glutGetWindow());
             exit(0);
@@ -174,7 +174,7 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
             map_mode_toggle();
             break;
         case 'o':
-            config.overhead_view=!config.overhead_view;
+            config.overhead_view = !config.overhead_view;
             break;
         case ' ':
             laser.active = true;  // in class prof. said to activate w/ space
@@ -207,10 +207,10 @@ void glut_hook_default__passive_motion(int x, int y) {
 }
 
 void glut_hook_default__reshape(int w, int h) {
-    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+    glViewport(0, 0, (GLsizei) w, (GLsizei) h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0, (GLfloat)w / (GLfloat)h, 0.1, WORLD_XZ * 4);
+    gluPerspective(45.0, (GLfloat) w / (GLfloat) h, 0.1, WORLD_XZ * 4);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     config.screen_width = w;

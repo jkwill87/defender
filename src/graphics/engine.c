@@ -49,39 +49,47 @@ static void _draw_cube(World *world, int x, int y, int z) {
 }
 
 static bool _cube_in_frustrum(float x, float y, float z, float n) {
-    for (int p = 0; p   < 6; p++) {
+    for (int p = 0; p < 6; p++) {
         if (
             f[p][0] * (x - n) + f[p][1]
-            * (y - n) + f[p][2] * (z - n) + f[p][3] > 0
-        ) continue;
+                                * (y - n) + f[p][2] * (z - n) + f[p][3] > 0
+            )
+            continue;
         if (
             f[p][0] * (x + n) + f[p][1] * (y - n)
             + f[p][2] * (z - n) + f[p][3] > 0
-        ) continue;
+            )
+            continue;
         if (
             f[p][0] * (x - n) + f[p][1] * (y + n)
             + f[p][2] * (z - n) + f[p][3] > 0
-        ) continue;
+            )
+            continue;
         if (
             f[p][0] * (x + n) + f[p][1] * (y + n)
             + f[p][2] * (z - n) + f[p][3] > 0
-        ) continue;
+            )
+            continue;
         if (
             f[p][0] * (x - n) + f[p][1] * (y - n)
             + f[p][2] * (z + n) + f[p][3] > 0
-        ) continue;
+            )
+            continue;
         if (
             f[p][0] * (x + n) + f[p][1] * (y - n)
             + f[p][2] * (z + n) + f[p][3] > 0
-        ) continue;
+            )
+            continue;
         if (
             f[p][0] * (x - n) + f[p][1] * (y + n)
             + f[p][2] * (z + n) + f[p][3] > 0
-        ) continue;
+            )
+            continue;
         if (
             f[p][0] * (x + n) + f[p][1] * (y + n)
             + f[p][2] * (z + n) + f[p][3] > 0
-        ) continue;
+            )
+            continue;
         return false;
     }
     return true;
@@ -100,12 +108,14 @@ static void _calc_line_of_sight() {
     laser.to.z = (player_pos.z + cosf(rot_y) * LASER_DIST) * -1 - laser.from.z;
 }
 
-static void _laser_draw() {
+static void _draw_laser() {
+    if (!laser.active) return;
+    _calc_line_of_sight();
     double angle =
         180.0f / PI * acos(
             laser.to.z / sqrt(
                 laser.to.x * laser.to.x + laser.to.y
-                * laser.to.y + laser.to.z * laser.to.z
+                                          * laser.to.y + laser.to.z * laser.to.z
             )
         );
     if (laser.to.z <= 0) {
@@ -124,14 +134,8 @@ static void _laser_draw() {
     gluDeleteQuadric(quadric);
 }
 
-static void _draw_laser() {
-    if (!laser.active) return;
-    _calc_line_of_sight();
-    _laser_draw();
-}
-
 static void _draw_world() {
-    if (config.display_all_cubes) {
+    if (config.display_all_cubes || config.overhead_view) {
         for (int x = 0; x < WORLD_XZ; x++) {
             for (int y = 0; y < WORLD_Y; y++) {
                 for (int z = 0; z < WORLD_XZ; z++) {
@@ -208,18 +212,24 @@ void glut_hook_default__display() {
     glClear(GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     if (config.overhead_view) {
-        glRotatef(90.0, 1.0, 0.0, 0.0);
-        glRotatef(0.0, 0.0, 1.0, 0.0);
-        glRotatef(0.0, 0.0, 0.0, 1.0);
-        glTranslatef(-1.0f * WORLD_XZ/2, -3 * WORLD_Y, -1.0f * WORLD_XZ/2);
+        laser.active = false;
+        glRotatef(57.5, 1.0, 0.0, 0.0);
+        glTranslatef(
+            -1.0f * WORLD_XZ / 2,
+            -2.45f * WORLD_Y,
+            -1.0f * WORLD_XZ - WORLD_XZ * 0.25f
+        );
+        viewpoint_light[0] = WORLD_XZ / 2.0f;
+        viewpoint_light[1] = WORLD_Y;
+        viewpoint_light[2] = WORLD_XZ / 2.0f;
     } else {
         glRotatef(view.cam_x, 1.0, 0.0, 0.0);
         glRotatef(view.cam_y, 0.0, 1.0, 0.0);
         glTranslatef(player_pos.x, player_pos.y, player_pos.z);
+        viewpoint_light[0] = -player_pos.x;
+        viewpoint_light[1] = -player_pos.y;
+        viewpoint_light[2] = -player_pos.z;
     }
-    viewpoint_light[0] = -player_pos.x;
-    viewpoint_light[1] = -player_pos.y;
-    viewpoint_light[2] = -player_pos.z;
     glLightfv(GL_LIGHT1, GL_POSITION, viewpoint_light);
     glShadeModel(GL_SMOOTH);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -229,7 +239,7 @@ void glut_hook_default__display() {
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, *get_material(COLOUR_GREY3));
     glPushMatrix();
     glTranslatef(WORLD_XZ / 2.0f, WORLD_Y / 2.0f, WORLD_XZ / 2.0f);
-    glutSolidCube(WORLD_XZ*4.0f);
+    glutSolidCube(WORLD_XZ * 4.0f);
     glPopMatrix();
     glShadeModel(GL_SMOOTH);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, *get_material(COLOUR_BLACK));
@@ -260,10 +270,10 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
     float length = (tx - bx) / 2.0f;
     if (length < 0) length *= -1;
     if (!_cube_in_frustrum(
-                bx + ((tx - bx) / 2),
-                by + ((ty - by) / 2),
-                bz + ((tz - bz) / 2),
-                length))
+        bx + ((tx - bx) / 2),
+        by + ((ty - by) / 2),
+        bz + ((tz - bz) / 2),
+        length))
         return;
     if (l != 1) {
         float new_centre_x, new_centre_y, new_centre_z;
@@ -293,16 +303,18 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
         }
         return;
     }
-    for (int x = (int)bx; x < tx + 1; x++) {
-        for (int y = (int)by; y < ty + 1; y++) {
-            for (int z = (int)bz; z < tz + 1; z++) {
+    for (int x = (int) bx; x < tx + 1; x++) {
+        for (int y = (int) by; y < ty + 1; y++) {
+            for (int z = (int) bz; z < tz + 1; z++) {
                 if (x >= WORLD_XZ || y >= WORLD_Y || z >= WORLD_XZ) continue;
                 if (
                     x <= -1 || y <= -1 || z <= -1 || world_terrain[x][y][z] == 0
-                ) continue;
+                    )
+                    continue;
                 if (
                     !_cube_in_frustrum(x + 0.5f, y + 0.5f, z + 0.5f, 0.5)
-                ) continue;
+                    )
+                    continue;
                 if (
                     !((x > 0 && (x < WORLD_XZ - 1) && y > 0 &&
                        (y < WORLD_Y - 1) && z > 0 && (z < WORLD_XZ - 1) &&
@@ -314,7 +326,8 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
                         world_terrain[x][y][z - 1] == 0)) ||
                       (x == 0 || x == WORLD_XZ - 1 || y == 0 ||
                        y == WORLD_Y - 1 || z == 0 || z == WORLD_XZ - 1))
-                ) continue;
+                    )
+                    continue;
                 display_list[view.count][0] = x;
                 display_list[view.count][1] = y;
                 display_list[view.count][2] = z;

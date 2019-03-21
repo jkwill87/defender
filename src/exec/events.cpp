@@ -43,8 +43,8 @@ static void _damage() {
             for (long j = Unit::units.size(); j > 0; j--) {
                 Unit *unit = Unit::units[j - 1];
                 if (fabs(unit->origin.x - pt.x) <= 2 &&
-                        fabs(unit->origin.y - pt.y) <= 2 &&
-                        fabs(unit->origin.z - pt.z) <= 2)
+                    fabs(unit->origin.y - pt.y) <= 2 &&
+                    fabs(unit->origin.z - pt.z) <= 2)
                     unit->shoot();
             }
         }

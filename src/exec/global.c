@@ -35,9 +35,9 @@ Pgm terrain = {
 };
 
 Position player_pos = {
-    .x = -1*WORLD_XZ/2,
-    .y = -1*WORLD_Y+MAP_CLEAR,
-    .z = -1*WORLD_XZ/2
+    .x = -1 * WORLD_XZ / 2,
+    .y = -1 * WORLD_Y + MAP_CLEAR,
+    .z = -1 * WORLD_XZ / 2
 };
 
 GlutHooks glut_hooks = {

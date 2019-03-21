@@ -71,7 +71,6 @@ Unit::~Unit() {
 
 // Protected Method Definitions ------------------------------------------------
 
-
 uint8 Unit::calc_min_y(int x, int z) {
     static int minimums[WORLD_XZ][WORLD_XZ] = {{-1}};
     static bool calculated = false;  // only need to compute once
@@ -88,18 +87,17 @@ uint8 Unit::calc_min_y(int x, int z) {
                 assert_gt(minimums[c.x][c.z], -1, "couldn't determine min");
             }
         }
-        calculated=true;
+        calculated = true;
     }
     return static_cast<uint8>(minimums[x][z]);
 }
-
 
 uint8 Unit::calc_min_y() {
     static uint8 y_min = 0;
     if (y_min) return y_min;  // only needs to be calculated once
     for (int x = 0; x < WORLD_XZ; x++)
         for (int z = 0; z < WORLD_XZ; z++)
-            y_min = max(y_min,calc_min_y(x,z));
+            y_min = max(y_min, calc_min_y(x, z));
     return y_min;
 }
 
@@ -134,8 +132,8 @@ coordinate Unit::calc_random_coordinate(bool edge) {
 int Unit::y_distance(const Unit *target) {
     int distance = 0;
     if (target && origin.x == target->origin.x &&
-            origin.z == target->origin.z &&
-            origin.y > target->origin.y) {
+        origin.z == target->origin.z &&
+        origin.y > target->origin.y) {
         return origin.y - target->origin.y;
     }
     return distance;
@@ -154,12 +152,12 @@ Unit *Unit::find_unit(Coordinate coordinate) {
 }
 
 void Unit::ai() {
-    target.x = max(target.x,MAP_CLEAR);
-    target.x = min(target.x,WORLD_XZ-MAP_CLEAR);
-    target.y = max(target.y,MAP_CLEAR);
-    target.y = min(target.y,WORLD_Y-MAP_CLEAR);
-    target.z = max(target.z,MAP_CLEAR);
-    target.z = min(target.z,WORLD_XZ-MAP_CLEAR);
+    target.x = max(target.x, MAP_CLEAR);
+    target.x = min(target.x, WORLD_XZ - MAP_CLEAR);
+    target.y = max(target.y, MAP_CLEAR);
+    target.y = min(target.y, WORLD_Y - MAP_CLEAR);
+    target.z = max(target.z, MAP_CLEAR);
+    target.z = min(target.z, WORLD_XZ - MAP_CLEAR);
     if (origin.x - target.x < 0) origin.x++;
     else if (origin.x - target.x > 0) origin.x--;
     if (origin.y - target.y < 0) origin.y++;
@@ -169,8 +167,8 @@ void Unit::ai() {
 }
 
 void Unit::render() {
-    is_colliding_ground=false;
-    is_colliding_unit=false;
+    is_colliding_ground = false;
+    is_colliding_unit = false;
     for (auto const &mapping : layout) {
         // Determine colour
         Colour colour = mapping.second;

@@ -21,11 +21,7 @@ Config config = {
     .test_world = false,
 };
 
-Laser laser = {
-    .active = false,
-    .from = {0},
-    .to = {0}
-};
+Laser lasers[UNIT_COUNT+1] = {{0}};
 
 Pgm terrain = {
     .x = 0,

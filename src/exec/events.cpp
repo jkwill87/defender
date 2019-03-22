@@ -15,7 +15,7 @@ using namespace std;
 
 // External Variable Declarations ----------------------------------------------
 
-extern Laser laser;
+extern Laser lasers[];
 extern Position player_pos;
 extern View view;
 extern World world_units;
@@ -31,7 +31,7 @@ static void _render() {
 }
 
 static void _damage() {
-    if (laser.active) {
+    if (lasers[0].active) {
         float rot_x = (view.cam_x / 180.0f * PI);
         float rot_y = (view.cam_y / 180.0f * PI);
         for (int i = 0; i < WORLD_XZ * WORLD_XZ; i++) {

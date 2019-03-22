@@ -77,7 +77,7 @@ typedef struct glut_hooks {
     void (*reshape)(int, int);
 } GlutHooks;
 
-typedef struct laser {
+typedef struct lasers {
     bool active;
     Position from;
     Position to;

@@ -34,7 +34,7 @@ void frustrum_extract();
 void start_game(int *argc, char **argv);
 void tree(float bx, float by, float bz, float tx, float ty, float tz, int l);
 void build_display_list();
-
+void shoot_laser();
 
 // PGM Function Declarations ---------------------------------------------------
 

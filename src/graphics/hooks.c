@@ -13,7 +13,7 @@
 // External Variable Declarations ----------------------------------------------
 
 extern Config config;
-extern Laser laser;
+extern Laser lasers[];
 extern Position player_pos;
 extern View view;
 extern World world_terrain;
@@ -109,7 +109,7 @@ static void _calc_player_move(Direction direction) {
 
 void glut_hook_default__draw_2d() {
     // note: layers overlay in the reverse order
-    if (laser.active) map_laser_layer();  // e.g. laser is drawn above terrain
+    if (lasers[0].active) map_laser_layer();  // e.g. lasers[0] is drawn above terrain
     map_npc_layer();  // same with npcs, etc...
     map_player_layer();
     map_outline_layer();
@@ -126,12 +126,12 @@ void glut_hook_default__idle_update() {
     bool next_tick = time - timer_base > 100 / GAME_SPEED;
     // log profiling information
     if (next_tick && config.show_fps) log_fps(frame, time, timer_base);
-    // reset laser cooldown
+    // reset lasers[0] cooldown
     bool laser_cooldown = time - laser_base > 350;
-    if (!laser.active) {
+    if (!lasers[0].active) {
         laser_base = time;
     } else if (laser_cooldown) {
-        laser.active = false;
+        lasers[0].active = false;
         laser_base = time;
     }
     // apply player movement
@@ -177,7 +177,7 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
             config.overhead_view = !config.overhead_view;
             break;
         case ' ':
-            laser.active = true;  // in class prof. said to activate w/ space
+            lasers[0].active = true;  // in class prof. said to activate w/ space
             break;
         default:
             break;
@@ -195,7 +195,7 @@ void glut_hook_default__motion(int x, int y) {
 
 void glut_hook_default__mouse(int button, int state, int x, int y) {
     if (button != 0 || state != 0) return;
-    laser.active = true;  // spec says to use mouse so that's used too
+    lasers[0].active = true;  // spec says to use mouse so that's used too
 }
 
 void glut_hook_default__passive_motion(int x, int y) {

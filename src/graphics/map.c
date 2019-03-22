@@ -13,7 +13,7 @@
 
 extern Config config;
 extern Position player_pos;
-extern Laser laser;
+extern Laser lasers[];
 extern World world_terrain;
 extern World world_units;
 
@@ -159,10 +159,10 @@ void map_npc_layer() {
 }
 
 void map_laser_layer() {
-    float p1_x = pt_se_x - laser.from.x * pt;
-    float p1_y = pt_se_y + laser.from.z * pt;
-    float p2_x = p1_x - laser.to.x * pt;
-    float p2_y = p1_y + laser.to.z * pt;
+    float p1_x = pt_se_x - lasers[0].from.x * pt;
+    float p1_y = pt_se_y + lasers[0].from.z * pt;
+    float p2_x = p1_x - lasers[0].to.x * pt;
+    float p2_y = p1_y + lasers[0].to.z * pt;
     glBegin(GL_LINES);
     glLineWidth(pt);
     _set_2d_colour(COLOUR_YELLOW, alpha * 1.5f);

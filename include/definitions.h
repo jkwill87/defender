@@ -9,7 +9,7 @@
 #define LANDER_VISIBILITY 4  //  1..15
 #define LETHAL_FALL_HEIGHT 5 //  1..50
 #define LANDER_COUNT 10      //  1..25
-#define HUMAN_COUNT 5       //  1..25
+#define HUMAN_COUNT 5        //  1..25
 
 // Not so much...
 #define LASER_DIST (WORLD_XZ * 1.5f)
@@ -18,3 +18,4 @@
 #define PGM_MAX_DIGITS 10
 #define PGM_MAX_DIM 1000
 #define PI 3.14159265358979323846f
+#define UNIT_COUNT (LANDER_COUNT + HUMAN_COUNT)

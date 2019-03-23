@@ -38,8 +38,7 @@ Lander::Lander(Coordinate coordinate)
     : Lander(coordinate.x, coordinate.y, coordinate.z) {
 }
 
-
-Lander::Lander() : Lander(calc_random_coordinate()) {
+Lander::Lander() : Lander(calc_random_coordinate(true)) {
 }
 
 Lander::~Lander() {
@@ -53,7 +52,7 @@ Lander::~Lander() {
 void Lander::new_search_path() {
     log("%s searching elsewhere", as_str.c_str());
     abandon_captive();
-    target = calc_random_coordinate(true);  // along edge
+    target = calc_random_coordinate(true,false);  // along edge
     target.y = origin.y;
 }
 
@@ -99,7 +98,10 @@ void Lander::action_bounce_unit() {
     target.x = WORLD_XZ - target.x;
     target.z = WORLD_XZ - target.z;
     target.y++;
-    abandon_captive();
+    if(captive) {
+        captive->action_drop();
+        abandon_captive();
+    }
 }
 
 void Lander::action_pursue() {
@@ -164,12 +166,12 @@ bool Lander::can_capture() {
 
 bool Lander::can_pursue(Human **rval) {
     Coordinate idx1;  // coordinate from
-    idx1.x = max(origin.x - LANDER_VISIBILITY, 0);
-    idx1.z = max(origin.z - LANDER_VISIBILITY, 0);
+    idx1.x = max(origin.x - LANDER_SEARCH_RANGE, 0);
+    idx1.z = max(origin.z - LANDER_SEARCH_RANGE, 0);
     idx1.y = 0;
     Coordinate idx2;  // coordinate to
-    idx2.x = min(origin.x + LANDER_VISIBILITY, WORLD_XZ - 1);
-    idx2.z = min(origin.z + LANDER_VISIBILITY, WORLD_XZ - 1);
+    idx2.x = min(origin.x + LANDER_SEARCH_RANGE, WORLD_XZ - 1);
+    idx2.z = min(origin.z + LANDER_SEARCH_RANGE, WORLD_XZ - 1);
     idx2.y = origin.y;
     Coordinate idx;  // coordinate counter
     for (idx.x = idx1.x; idx.x < idx2.x; idx.x++) {
@@ -190,8 +192,8 @@ bool Lander::can_exit() {
 }
 
 bool Lander::can_shoot_player() {
-    return abs(origin.x + player_pos.x) < LANDER_VISIBILITY * 4 &&
-           abs(origin.z + player_pos.z) < LANDER_VISIBILITY * 4;
+    return abs(origin.x + player_pos.x) < LANDER_ATTACK_RANGE &&
+           abs(origin.z + player_pos.z) < LANDER_ATTACK_RANGE;
 }
 
 

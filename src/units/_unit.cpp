@@ -101,32 +101,32 @@ uint8 Unit::calc_min_y() {
     return y_min;
 }
 
-coordinate Unit::calc_random_coordinate(bool edge) {
+coordinate Unit::calc_random_coordinate(bool edge, bool above_terrain) {
     uint8 x = _gen_random(MAP_CLEAR, WORLD_XZ - MAP_CLEAR);
     uint8 z = _gen_random(MAP_CLEAR, WORLD_XZ - MAP_CLEAR);
-    uint8 y = _gen_random(calc_min_y(x, z), WORLD_Y - MAP_CLEAR);
-    Coordinate coordinate = {x, y, z};
+    const uint8 y_from = above_terrain ? calc_min_y(x, z) : 1;
+    const uint8 y_to =WORLD_Y - MAP_CLEAR;
+    uint8 y = _gen_random(y_from, y_to);
+    Coordinate c = {x, y, z};
     if (edge) {
         switch (_gen_random(0, 4)) {
             case 0:
-                coordinate.x = MAP_CLEAR;
+                c.x = MAP_CLEAR;
                 break;
             case 1:
-                coordinate.x = WORLD_XZ - MAP_CLEAR;
+                c.x = WORLD_XZ - MAP_CLEAR;
                 break;
             case 2:
-                coordinate.z = MAP_CLEAR;
+                c.z = MAP_CLEAR;
                 break;
             default:
-                coordinate.z = WORLD_XZ - MAP_CLEAR;
+                c.z = WORLD_XZ - MAP_CLEAR;
                 break;
         }
     }
-
-    bool already_occupied =
-        world_units[coordinate.x][coordinate.y][coordinate.z] ||
-        world_terrain[coordinate.x][coordinate.y][coordinate.z];
-    return already_occupied ? calc_random_coordinate(edge) : coordinate;
+    bool already_occupied = world_units[c.x][c.y][c.z] ||
+        world_terrain[c.x][c.y][c.z];
+    return already_occupied ? calc_random_coordinate(edge) : c;
 }
 
 int Unit::y_distance(const Unit *target) {

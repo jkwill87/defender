@@ -42,7 +42,10 @@ class Unit {
     protected:
     static uint8 calc_min_y();
     static uint8 calc_min_y(int x, int z);
-    static coordinate calc_random_coordinate(bool edge = false);
+    static coordinate calc_random_coordinate(
+        bool edge = false,
+        bool above_terrain = true
+    );
     int y_distance(const Unit *target);
 
     public:
@@ -61,7 +64,10 @@ class Human : public Unit {
 
     private:
     typedef enum : uint8 {
-        SETTLED = 0, FALLING, FLOATING, KILLED
+        SETTLED = 0,
+        FALLING,
+        FLOATING,
+        KILLED
     } State;
 
     // Instance Variables ------------------------------------------------------

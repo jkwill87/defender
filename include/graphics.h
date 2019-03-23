@@ -29,18 +29,18 @@ Material *get_material_a(Colour colour, float alpha);
 
 // Engine Function Declarations ------------------------------------------------
 
-void glut_hook_default__display();
+void build_display_list();
 void frustrum_extract();
+void glut_hook_default__display();
+void shoot_laser();
 void start_game(int *argc, char **argv);
 void tree(float bx, float by, float bz, float tx, float ty, float tz, int l);
-void build_display_list();
-void shoot_laser();
 
 // PGM Function Declarations ---------------------------------------------------
 
-void pgm_init(const char *filename);
 unsigned pgm_calc_ceil();
 unsigned pgm_get_y_value(double x, double z);
+void pgm_init(const char *filename);
 void pgm_set_world_terrain();
 
 
@@ -57,13 +57,13 @@ void glut_hook_default__reshape(int w, int h);
 
 // Map Function Declarations ---------------------------------------------------
 
-void map_mode_toggle();
-void map_pos_update();
-void map_outline_layer();
-void map_terrain_layer();
-void map_player_layer();
-void map_npc_layer();
 void map_laser_layer();
+void map_mode_toggle();
+void map_npc_layer();
+void map_outline_layer();
+void map_player_layer();
+void map_pos_update();
+void map_terrain_layer();
 
 
 #ifdef __cplusplus

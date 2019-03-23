@@ -46,15 +46,15 @@ typedef struct config {
     bool display_all_cubes;
     bool fly_control;
     bool full_screen;
+    bool overhead_view;
+    bool pause_units;
     bool show_fps;
     bool test_world;
-    bool overhead_view;
     bool timer_unlock;
-    bool pause_units;
     bool traction;
+    enum map_mode map_mode;
     int screen_height;
     int screen_width;
-    enum map_mode map_mode;
 } Config;
 
 typedef struct position {
@@ -94,9 +94,9 @@ typedef struct pgm {
 } Pgm;
 
 typedef struct view {
-    int count;
     int cam_x;
     int cam_y;
     int old_x;
     int old_y;
+    int count;
 } View;

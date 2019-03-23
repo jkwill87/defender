@@ -13,15 +13,15 @@ Config config = {
     .display_all_cubes = false,
     .fly_control = false,
     .full_screen = false,
-    .map_mode = MAP_MINI,
     .overhead_view=false,
-    .timer_unlock=false,
     .pause_units=false,
-    .traction=false,
-    .screen_height = 720,
-    .screen_width = 1280,
     .show_fps = false,
     .test_world = false,
+    .timer_unlock=false,
+    .traction=false,
+    .map_mode = MAP_MINI,
+    .screen_height = 720,
+    .screen_width = 1280,
 };
 
 Laser lasers[UNIT_COUNT + 1] = {{0}};
@@ -34,9 +34,9 @@ Pgm terrain = {
 };
 
 Position player_pos = {
-    .x = -1 * WORLD_XZ / 2,
-    .y = -1 * WORLD_Y + MAP_CLEAR,
-    .z = -1 * WORLD_XZ / 2
+    .x = -1.0f * WORLD_XZ / 2.0f,
+    .y = -1.0f * WORLD_Y + MAP_CLEAR,
+    .z = -1.0f * WORLD_XZ / 2.0f
 };
 
 GlutHooks glut_hooks = {

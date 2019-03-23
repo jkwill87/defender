@@ -110,10 +110,9 @@ static void _calc_player_move(Direction direction) {
 
 void glut_hook_default__draw_2d() {
     // note: layers overlay in the reverse order
-    if (lasers[0].active)
-        map_laser_layer();  // e.g. lasers[0] is drawn above terrain
-    map_npc_layer();  // same with npcs, etc...
-    map_player_layer();
+    map_player_layer();  // e.g. player is drawn above terrain
+    if (lasers[0].active) map_laser_layer();  // same with laser, etc...
+    map_npc_layer();
     map_outline_layer();
     map_terrain_layer();
 }

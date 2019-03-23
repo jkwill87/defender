@@ -111,10 +111,10 @@ static void _shuffle(uint8 *a, uint8 n) {
         srand((unsigned) time(NULL));
         first_call = false;
     }
-    for (int i = 0; i < n; i++) a[i] = i;
-    for (int i = 0; i < n - 1; i++) {
+    for (uint8 i = 0; i < n; i++) a[i] = i;
+    for (uint8 i = 0; i < n - 1; i++) {
         int j = i + rand() / (RAND_MAX / (n - i) + 1);
-        int t = a[j];
+        uint8 t = a[j];
         a[j] = a[i];
         a[i] = t;
     }
@@ -125,8 +125,7 @@ static bool _is_floating_block(uint8 x, uint8 y, uint8 z) {
     // block directly below
     if (world_terrain[x][y - 1][z]) pts += 4;
     // blocks below
-    if (y - 1 >= 0 && world_terrain[x][y - 1][z])
-        pts += 3;
+    if (y - 1 >= 0 && world_terrain[x][y - 1][z]) pts += 3;
     // blocks underneath and offset
     if (x - 1 >= 0 && world_terrain[x - 1][y - 1][z]) pts += 4;
     if (x + 1 < WORLD_XZ && world_terrain[x + 1][y - 1][z]) pts += 4;

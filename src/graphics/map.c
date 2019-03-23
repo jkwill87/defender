@@ -12,8 +12,9 @@
 // External Variable Declarations ----------------------------------------------
 
 extern Config config;
-extern Position player_pos;
 extern Laser lasers[];
+extern Position player_pos;
+extern View view;
 extern World world_terrain;
 extern World world_units;
 
@@ -124,8 +125,8 @@ void map_terrain_layer() {
 
 void map_player_layer() {
     float px_size = pt * 4;
-    float px_x = pt_se_x + player_pos.x * pt;
-    float px_y = pt_se_y - player_pos.z * pt;
+    float px_x = pt_nw_x - player_pos.x * pt;
+    float px_y = pt_nw_y + player_pos.z * pt;
     glBegin(GL_TRIANGLES);
     _set_2d_colour(COLOUR_RED, alpha * 1.5f);
     glVertex2f(px_x, px_y + px_size);
@@ -142,11 +143,13 @@ void map_npc_layer() {
             int y;
             for (y = WORLD_Y - 1; y >= 0; y--) {
                 if (world_units[x][y][z] == COLOUR_NONE) continue;
-                px_x = pt_se_x - x * pt;
+                px_x = pt_nw_x + x * pt;
                 px_y = pt_nw_y - z * pt;
                 glBegin(GL_QUADS);
-                _set_2d_colour(COLOUR_GREEN,
-                               .125f + (float) (WORLD_Y - y) / WORLD_Y);
+                _set_2d_colour(
+                    COLOUR_GREEN,
+                    0.125f + (float) (WORLD_Y - y) / WORLD_Y
+                );
                 glVertex2f(px_x - px_size, px_y - px_size);
                 glVertex2f(px_x + px_size, px_y - px_size);
                 glVertex2f(px_x + px_size, px_y + px_size);
@@ -167,7 +170,9 @@ void map_laser_layer() {
     glLineWidth(pt);
     _set_2d_colour(COLOUR_YELLOW, alpha * 1.5f);
     glVertex2f(p1_x, p1_y);
-    glVertex2f((GLfloat) fmax(fmin(pt_se_x, p2_x), pt_nw_x),
-               (GLfloat) fmax(fmin(pt_nw_y, p2_y), pt_se_y));
+    glVertex2f(
+        (GLfloat) fmax(fmin(pt_se_x, p2_x), pt_nw_x),
+        (GLfloat) fmax(fmin(pt_nw_y, p2_y), pt_se_y)
+    );
     glEnd();
 }

@@ -97,9 +97,10 @@ static void _calc_player_move(Direction direction) {
         return;
     }
     // decay acceleration
-    accel_x /= 1.0125;
-    accel_y /= 1.0125;
-    accel_z /= 1.0125;
+    float decay = config.traction ? 2 : 1.025f;
+    accel_x /= decay;
+    accel_y /= decay;
+    accel_z /= decay;
     // idle_update position if changed
     player_pos = player_pos_next;
 }
@@ -109,7 +110,8 @@ static void _calc_player_move(Direction direction) {
 
 void glut_hook_default__draw_2d() {
     // note: layers overlay in the reverse order
-    if (lasers[0].active) map_laser_layer();  // e.g. lasers[0] is drawn above terrain
+    if (lasers[0].active)
+        map_laser_layer();  // e.g. lasers[0] is drawn above terrain
     map_npc_layer();  // same with npcs, etc...
     map_player_layer();
     map_outline_layer();
@@ -136,7 +138,7 @@ void glut_hook_default__idle_update() {
     }
     // apply player movement
     _calc_player_move(DIRECTION_COAST);
-    if (!next_tick) return;
+    if (!next_tick && !config.timer_unlock) return;
     // reset time base
     timer_base = time;
     frame = 0;
@@ -153,11 +155,6 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
             unit_rm_all();
             glutDestroyWindow(glutGetWindow());
             exit(0);
-        case 'f':
-            config.fly_control = !config.fly_control;
-            printf("fly controls set to %s\n",
-                   config.fly_control ? "ON" : "OFF");
-            break;
         case 'w':
             direction = DIRECTION_FORWARD;
             break;
@@ -173,8 +170,47 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
         case 'm':
             map_mode_toggle();
             break;
+        case 'f':
+            config.fly_control = !config.fly_control;
+            printf(
+                "fly controls set to %s\n",
+                config.fly_control ? "ON" : "OFF"
+            );
+            if (config.fly_control) {
+                player_pos.y = -1 * WORLD_Y + MAP_CLEAR;
+            }
+            break;
         case 'o':
             config.overhead_view = !config.overhead_view;
+            printf(
+                "overhead view set to %s\n",
+                config.fly_control ? "ON" : "OFF"
+            );
+            if (config.overhead_view) {
+                player_pos.y = -1 * WORLD_Y + MAP_CLEAR * 2;
+            }
+            break;
+
+        case 't':
+            config.traction = !config.traction;
+            printf(
+                "traction set to %s\n",
+                config.traction ? "ON" : "OFF"
+            );
+            break;
+        case 'u':
+            config.timer_unlock = !config.timer_unlock;
+            printf(
+                "timer unlock set to %s\n",
+                config.fly_control ? "ON" : "OFF"
+            );
+            break;
+        case 'p':
+            config.pause_units = !config.pause_units;
+            printf(
+                "pause units set to %s\n",
+                config.fly_control ? "ON" : "OFF"
+            );
             break;
         case ' ':
             lasers[0].active = true;  // in class prof. said to activate w/ space

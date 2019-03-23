@@ -18,7 +18,7 @@ using namespace std;
 
 extern World world_terrain;
 extern World world_units;
-
+extern Config config;
 
 // Static Function Definitions -------------------------------------------------
 
@@ -152,6 +152,7 @@ Unit *Unit::find_unit(Coordinate coordinate) {
 }
 
 void Unit::ai() {
+    if (config.pause_units) return;
     target.x = max(target.x, MAP_CLEAR);
     target.x = min(target.x, WORLD_XZ - MAP_CLEAR);
     target.y = max(target.y, MAP_CLEAR);

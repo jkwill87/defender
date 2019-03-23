@@ -5,8 +5,8 @@
  */
 
 #include <algorithm>
+#include <cmath>
 #include "debug.h"
-#include "graphics.h"
 #include "units.hpp"
 
 using namespace std;
@@ -22,14 +22,14 @@ extern Laser lasers[];
 // Constructor Definition ------------------------------------------------------
 
 Lander::Lander(int x, int y, int z) : Unit(x, y, z, "lander") {
-    layout[ {-2, -1, +0}] = COLOUR_GREEN;
-    layout[ {+2, -1, +0}] = COLOUR_GREEN;
-    layout[ {+0, -1, -2}] = COLOUR_GREEN;
-    layout[ {+0, -1, +2}] = COLOUR_GREEN;
-    layout[ {+0, +1, +0}] = COLOUR_GREEN;
-    layout[ {-1, +1, +0}] = COLOUR_GREEN;
-    layout[ {+1, +1, +0}] = COLOUR_GREEN;
-    layout[ {+0, +2, +0}] = COLOUR_YELLOW;
+    layout[{-2, -1, +0}] = COLOUR_GREEN;
+    layout[{+2, -1, +0}] = COLOUR_GREEN;
+    layout[{+0, -1, -2}] = COLOUR_GREEN;
+    layout[{+0, -1, +2}] = COLOUR_GREEN;
+    layout[{+0, +1, +0}] = COLOUR_GREEN;
+    layout[{-1, +1, +0}] = COLOUR_GREEN;
+    layout[{+1, +1, +0}] = COLOUR_GREEN;
+    layout[{+0, +2, +0}] = COLOUR_YELLOW;
     origin.y = min(origin.y, (int) calc_min_y());
     new_search_path();
 }
@@ -44,6 +44,7 @@ Lander::Lander() : Lander(calc_random_coordinate()) {
 
 Lander::~Lander() {
     if (captive) captive->action_drop();
+    lasers[id].active = false;
 }
 
 
@@ -82,7 +83,7 @@ void Lander::decide_next() {
 // Actions
 void Lander::action_search() {
     if (origin.x <= MAP_CLEAR || origin.x >= WORLD_XZ - MAP_CLEAR ||
-            origin.z <= MAP_CLEAR || origin.z >= WORLD_XZ - MAP_CLEAR)
+        origin.z <= MAP_CLEAR || origin.z >= WORLD_XZ - MAP_CLEAR)
         new_search_path();
 }
 
@@ -98,6 +99,7 @@ void Lander::action_bounce_unit() {
     target.x = WORLD_XZ - target.x;
     target.z = WORLD_XZ - target.z;
     target.y++;
+    abandon_captive();
 }
 
 void Lander::action_pursue() {
@@ -121,26 +123,24 @@ void Lander::action_exit() {
     captive->action_capture();
     abandon_captive();
     state = ATTACKING;
-    layout[ {-2, -1, +0}] = COLOUR_RED;
-    layout[ {+2, -1, +0}] = COLOUR_RED;
-    layout[ {+0, -1, -2}] = COLOUR_RED;
-    layout[ {+0, -1, +2}] = COLOUR_RED;
-    layout[ {+0, +1, +0}] = COLOUR_RED;
-    layout[ {-1, +1, +0}] = COLOUR_RED;
-    layout[ {+1, +1, +0}] = COLOUR_RED;
+    layout[{-2, -1, +0}] = COLOUR_RED;
+    layout[{+2, -1, +0}] = COLOUR_RED;
+    layout[{+0, -1, -2}] = COLOUR_RED;
+    layout[{+0, -1, +2}] = COLOUR_RED;
+    layout[{+0, +1, +0}] = COLOUR_RED;
+    layout[{-1, +1, +0}] = COLOUR_RED;
+    layout[{+1, +1, +0}] = COLOUR_RED;
 }
 
 void Lander::action_attack() {
-    if (origin.x==target.x&&origin.y==target.y&&origin.z==target.z) {
-        target=calc_random_coordinate();
+    if (origin.x == target.x && origin.y == target.y && origin.z == target.z) {
+        target = calc_random_coordinate();
     }
-    bool is_firing = origin.x+player_pos.x<LANDER_VISIBILITY &&
-                     origin.z+player_pos.z<LANDER_VISIBILITY;
-    lasers[id].active= is_firing;
+    bool is_firing = can_shoot_player();
+    lasers[id].active = is_firing;
     if (!is_firing) return;
-
     lasers[id].to.x = (origin.x - (player_pos.x * -1)) * -1;
-    lasers[id].to.y = (origin.y - (player_pos.y * -1)) * -1 -1;
+    lasers[id].to.y = (origin.y - (player_pos.y * -1)) * -1 - 1;
     lasers[id].to.z = (origin.z - (player_pos.z * -1)) * -1;
     lasers[id].from.x = origin.x;
     lasers[id].from.y = origin.y;
@@ -162,7 +162,7 @@ bool Lander::can_capture() {
     return y_distance(captive) > 0;
 }
 
-bool Lander::can_pursue(Human **human) {
+bool Lander::can_pursue(Human **rval) {
     Coordinate idx1;  // coordinate from
     idx1.x = max(origin.x - LANDER_VISIBILITY, 0);
     idx1.z = max(origin.z - LANDER_VISIBILITY, 0);
@@ -176,8 +176,8 @@ bool Lander::can_pursue(Human **human) {
         for (idx.z = idx1.z; idx.z < idx2.z; idx.z++) {
             for (idx.y = idx1.y; idx.y < idx2.y; idx.y++) {
                 if (world_units[idx.x][idx.y][idx.z]) {
-                    *human = dynamic_cast<Human *>(find_unit(idx));
-                    if (*human && (*human)->available) return true;
+                    *rval = dynamic_cast<Human *>(find_unit(idx));
+                    if (*rval && (*rval)->available) return true;
                 }
             }
         }
@@ -185,12 +185,13 @@ bool Lander::can_pursue(Human **human) {
     return false;
 }
 
-bool Lander::can_shoot_player() {
-    return false;
-}
-
 bool Lander::can_exit() {
     return captive && WORLD_Y - origin.y < MAP_CLEAR * 2;
+}
+
+bool Lander::can_shoot_player() {
+    return abs(origin.x + player_pos.x) < LANDER_VISIBILITY * 4 &&
+           abs(origin.z + player_pos.z) < LANDER_VISIBILITY * 4;
 }
 
 
@@ -229,15 +230,15 @@ void Lander::ai() {
 void Lander::render() {
     Colour base = state == ATTACKING ? COLOUR_RED : COLOUR_GREEN;
     if (cycle % 2) {
-        layout[ {+0, +0, +1}] = base;
-        layout[ {+0, +0, -1}] = base;
-        layout[ {-1, +0, +0}] = COLOUR_YELLOW;
-        layout[ {+1, +0, +0}] = COLOUR_YELLOW;
+        layout[{+0, +0, +1}] = base;
+        layout[{+0, +0, -1}] = base;
+        layout[{-1, +0, +0}] = COLOUR_YELLOW;
+        layout[{+1, +0, +0}] = COLOUR_YELLOW;
     } else {
-        layout[ {+0, +0, +1}] = COLOUR_YELLOW;
-        layout[ {+0, +0, -1}] = COLOUR_YELLOW;
-        layout[ {-1, +0, +0}] = base;
-        layout[ {+1, +0, +0}] = base;
+        layout[{+0, +0, +1}] = COLOUR_YELLOW;
+        layout[{+0, +0, -1}] = COLOUR_YELLOW;
+        layout[{-1, +0, +0}] = base;
+        layout[{+1, +0, +0}] = base;
     }
     Unit::render();
 }

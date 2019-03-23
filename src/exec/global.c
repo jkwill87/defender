@@ -15,13 +15,16 @@ Config config = {
     .full_screen = false,
     .map_mode = MAP_MINI,
     .overhead_view=false,
+    .timer_unlock=false,
+    .pause_units=false,
+    .traction=false,
     .screen_height = 720,
     .screen_width = 1280,
     .show_fps = false,
     .test_world = false,
 };
 
-Laser lasers[UNIT_COUNT+1] = {{0}};
+Laser lasers[UNIT_COUNT + 1] = {{0}};
 
 Pgm terrain = {
     .x = 0,

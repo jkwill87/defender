@@ -49,6 +49,9 @@ typedef struct config {
     bool show_fps;
     bool test_world;
     bool overhead_view;
+    bool timer_unlock;
+    bool pause_units;
+    bool traction;
     int screen_height;
     int screen_width;
     enum map_mode map_mode;

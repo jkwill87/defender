@@ -52,43 +52,43 @@ static bool _cube_in_frustrum(float x, float y, float z, float n) {
     for (int p = 0; p < 6; p++) {
         if (
             f[p][0] * (x - n) + f[p][1]
-            * (y - n) + f[p][2] * (z - n) + f[p][3] > 0
-        )
+                                * (y - n) + f[p][2] * (z - n) + f[p][3] > 0
+            )
             continue;
         if (
             f[p][0] * (x + n) + f[p][1] * (y - n)
             + f[p][2] * (z - n) + f[p][3] > 0
-        )
+            )
             continue;
         if (
             f[p][0] * (x - n) + f[p][1] * (y + n)
             + f[p][2] * (z - n) + f[p][3] > 0
-        )
+            )
             continue;
         if (
             f[p][0] * (x + n) + f[p][1] * (y + n)
             + f[p][2] * (z - n) + f[p][3] > 0
-        )
+            )
             continue;
         if (
             f[p][0] * (x - n) + f[p][1] * (y - n)
             + f[p][2] * (z + n) + f[p][3] > 0
-        )
+            )
             continue;
         if (
             f[p][0] * (x + n) + f[p][1] * (y - n)
             + f[p][2] * (z + n) + f[p][3] > 0
-        )
+            )
             continue;
         if (
             f[p][0] * (x - n) + f[p][1] * (y + n)
             + f[p][2] * (z + n) + f[p][3] > 0
-        )
+            )
             continue;
         if (
             f[p][0] * (x + n) + f[p][1] * (y + n)
             + f[p][2] * (z + n) + f[p][3] > 0
-        )
+            )
             continue;
         return false;
     }
@@ -127,8 +127,8 @@ static void _draw_laser(Laser laser) {
     double angle =
         180.0f / PI * acos(
             laser.to.z / sqrt(
-                laser.to.x * laser.to.x 
-                + laser.to.y * laser.to.y 
+                laser.to.x * laser.to.x
+                + laser.to.y * laser.to.y
                 + laser.to.z * laser.to.z
             )
         );
@@ -200,6 +200,8 @@ void glut_hook_default__display() {
     if (config.overhead_view) {
         lasers[0].active = false;
         glRotatef(57.5, 1.0, 0.0, 0.0);
+        view.cam_x = 0;
+        view.cam_y = 0;
         glTranslatef(
             -1.0f * WORLD_XZ / 2,
             -2.45f * WORLD_Y,
@@ -208,10 +210,10 @@ void glut_hook_default__display() {
         viewpoint_light[0] = WORLD_XZ / 2.0f;
         viewpoint_light[1] = WORLD_Y;
         viewpoint_light[2] = WORLD_XZ / 2.0f;
-        int x = player_pos.x*-1;
-        int y = player_pos.y*-1;
-        int z = player_pos.z*-1;
-        world_units[x][y][z]=COLOUR_YELLOW;
+        int x = player_pos.x * -1;
+        int y = player_pos.y * -1;
+        int z = player_pos.z * -1;
+        world_units[x][y][z] = COLOUR_YELLOW;
     } else {
         glRotatef(view.cam_x, 1.0, 0.0, 0.0);
         glRotatef(view.cam_y, 0.0, 1.0, 0.0);
@@ -260,10 +262,10 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
     float length = (tx - bx) / 2.0f;
     if (length < 0) length *= -1;
     if (!_cube_in_frustrum(
-                bx + ((tx - bx) / 2),
-                by + ((ty - by) / 2),
-                bz + ((tz - bz) / 2),
-                length))
+        bx + ((tx - bx) / 2),
+        by + ((ty - by) / 2),
+        bz + ((tz - bz) / 2),
+        length))
         return;
     if (l != 1) {
         float new_centre_x, new_centre_y, new_centre_z;
@@ -299,11 +301,11 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
                 if (x >= WORLD_XZ || y >= WORLD_Y || z >= WORLD_XZ) continue;
                 if (
                     x <= -1 || y <= -1 || z <= -1 || world_terrain[x][y][z] == 0
-                )
+                    )
                     continue;
                 if (
                     !_cube_in_frustrum(x + 0.5f, y + 0.5f, z + 0.5f, 0.5)
-                )
+                    )
                     continue;
                 if (
                     !((x > 0 && (x < WORLD_XZ - 1) && y > 0 &&
@@ -316,7 +318,7 @@ void tree(float bx, float by, float bz, float tx, float ty, float tz, int l) {
                         world_terrain[x][y][z - 1] == 0)) ||
                       (x == 0 || x == WORLD_XZ - 1 || y == 0 ||
                        y == WORLD_Y - 1 || z == 0 || z == WORLD_XZ - 1))
-                )
+                    )
                     continue;
                 display_list[view.count][0] = x;
                 display_list[view.count][1] = y;
@@ -463,13 +465,16 @@ void shoot_laser() {
         laser.from.y = player_pos.y * -1 - 1;
         laser.from.z = player_pos.z * -1;
         // to
-        laser.to.x = (player_pos.x - sinf(rot_y) * LASER_DIST) * -1 - laser.from.x;
-        laser.to.y = (player_pos.y + sinf(rot_x) * LASER_DIST) * -1 - laser.from.y;
-        laser.to.z = (player_pos.z + cosf(rot_y) * LASER_DIST) * -1 - laser.from.z;
+        laser.to.x =
+            (player_pos.x - sinf(rot_y) * LASER_DIST) * -1 - laser.from.x;
+        laser.to.y =
+            (player_pos.y + sinf(rot_x) * LASER_DIST) * -1 - laser.from.y;
+        laser.to.z =
+            (player_pos.z + cosf(rot_y) * LASER_DIST) * -1 - laser.from.z;
         _draw_laser(laser);
     }
     for (uint8 i = 0; i < UNIT_COUNT; i++) {
-        laser=lasers[i+1];
+        laser = lasers[i + 1];
         if (laser.active) _draw_laser(laser);
     }
 }

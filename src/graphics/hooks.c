@@ -169,6 +169,10 @@ void glut_hook_default__keyboard(unsigned char key, int x, int y) {
         case 'm':
             map_mode_toggle();
             break;
+        case 'r':
+            unit_reset_all();
+            printf("resetting units");
+            break;
         case 'f':
             config.fly_control = !config.fly_control;
             printf(

@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include "debug.h"
 #include "units.hpp"
 
@@ -53,7 +54,6 @@ void Lander::new_search_path() {
     log("%s searching elsewhere", as_str.c_str());
     abandon_captive();
     target = calc_random_coordinate(true,false);  // along edge
-    target.y = origin.y;
 }
 
 void Lander::set_captive(Human *human) {
@@ -65,7 +65,9 @@ void Lander::set_captive(Human *human) {
 void Lander::decide_next() {
     if (state >= ATTACKING) return;
     Human *human;
-    if (can_exit()) {
+    if (daze_counter){
+        state = SEARCHING;
+    } else if (can_exit()) {
         state = EXITED;
     } else if (can_escape()) {
         state = ESCAPING;
@@ -81,8 +83,18 @@ void Lander::decide_next() {
 
 // Actions
 void Lander::action_search() {
-    if (origin.x <= MAP_CLEAR || origin.x >= WORLD_XZ - MAP_CLEAR ||
-        origin.z <= MAP_CLEAR || origin.z >= WORLD_XZ - MAP_CLEAR)
+    bool new_search = false;
+    if (origin.x <= MAP_CLEAR) 
+        new_search = true;
+    else if (origin.x >= WORLD_XZ - MAP_CLEAR) 
+        new_search= true;
+    else if (origin.z <= MAP_CLEAR) 
+        new_search = true;
+    else if (origin.z >= WORLD_XZ - MAP_CLEAR) 
+        new_search = true;
+    else if (origin.x==target.x && origin.y==target.y&&origin.z==target.z) 
+        new_search=true;
+    if(new_search)
         new_search_path();
 }
 
@@ -91,6 +103,7 @@ void Lander::action_bounce_ground() {
     origin.y++;
     target.y += 5;
     if (captive) captive->action_lift();
+    daze_counter=LANDER_SEARCH_RANGE*2;
 }
 
 void Lander::action_bounce_unit() {
@@ -102,6 +115,7 @@ void Lander::action_bounce_unit() {
         captive->action_drop();
         abandon_captive();
     }
+    daze_counter=LANDER_SEARCH_RANGE*2;
 }
 
 void Lander::action_pursue() {
@@ -147,6 +161,7 @@ void Lander::action_attack() {
     lasers[id].from.x = origin.x;
     lasers[id].from.y = origin.y;
     lasers[id].from.z = origin.z;
+    cout << as_str + " shot player!" << endl;
 }
 
 void Lander::action_kill() {
@@ -200,6 +215,8 @@ bool Lander::can_shoot_player() {
 // Public Method Definitions ---------------------------------------------------
 
 void Lander::ai() {
+    decide_next();
+    if(daze_counter) daze_counter--;
     switch (state) {
         case SEARCHING:
             action_search();
@@ -223,7 +240,6 @@ void Lander::ai() {
             action_kill();
             return;
     }
-    decide_next();
     if (is_colliding_ground) action_bounce_ground();
     if (is_colliding_unit) action_bounce_unit();
     Unit::ai();
@@ -246,5 +262,8 @@ void Lander::render() {
 }
 
 void Lander::abandon_captive() {
-    captive = nullptr;
+    if(captive) {
+        captive->action_drop();
+        captive = nullptr;
+    }
 }

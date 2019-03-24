@@ -116,7 +116,7 @@ static void _draw_units() {
                 _draw_cube(&world_units, x, y, z);
 }
 
-static void _draw_laser(Laser *laser) {
+static void _draw_laser(Laser *laser, Colour colour) {
     double angle =
         180.0f / PI * acos(
             laser->to.z / sqrt(
@@ -133,7 +133,7 @@ static void _draw_laser(Laser *laser) {
     glTranslatef(laser->from.x, laser->from.y, laser->from.z);
     glRotated(angle, -laser->to.y * laser->to.z, laser->to.x * laser->to.z, 0);
     glMaterialfv(
-        GL_FRONT, GL_AMBIENT_AND_DIFFUSE, *get_material(COLOUR_YELLOW)
+        GL_FRONT, GL_AMBIENT_AND_DIFFUSE, *get_material(colour)
     );
     gluQuadricOrientation(quadric, GLU_OUTSIDE);
     gluCylinder(quadric, 0.25f, 0.25f, 100, 100, 1);
@@ -459,10 +459,10 @@ void shoot_laser() {
         laser->to.x = sinf(rot_y) * +100 - player_pos.x - laser->from.x;
         laser->to.y = sinf(rot_x) * -100 - player_pos.y - laser->from.y;
         laser->to.z = cosf(rot_y) * -100 - player_pos.z - laser->from.z;
-        _draw_laser(laser);
+        _draw_laser(laser, COLOUR_YELLOW);
     }
     for (uint8 i = 0; i < UNIT_COUNT; i++) {
         laser = &lasers[i + 1];
-        if (laser->active) _draw_laser(laser);
+        if (laser->active) _draw_laser(laser, COLOUR_RED);
     }
 }

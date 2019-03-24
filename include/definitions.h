@@ -2,15 +2,15 @@
 
 // Constant Definitions --------------------------------------------------------
 
-// Configurable
-#define GAME_SPEED 2            //  1..10
-#define HUMAN_COUNT 5           //  1..25
-#define LANDER_ATTACK_RANGE 12  //  1..15
-#define LANDER_COUNT 10          //  1..25
-#define LANDER_SEARCH_RANGE 5   //  1..15
-#define LETHAL_FALL_HEIGHT 5    //  1..50
-#define WORLD_XZ 100            // 50..150
-#define WORLD_Y 50              // 50..150
+// Configurable...
+#define GAME_SPEED 2
+#define HUMAN_COUNT 4
+#define LANDER_ATTACK_RANGE 14
+#define LANDER_COUNT 12
+#define LANDER_SEARCH_RANGE 6
+#define LETHAL_FALL_HEIGHT 5
+#define WORLD_XZ 100
+#define WORLD_Y 50
 
 // Not so much...
 #define MAP_CLEAR 5

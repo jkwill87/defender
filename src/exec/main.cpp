@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include "debug.h"
+#include "exec.h"
 #include "graphics.h"
 #include "units.hpp"
 
@@ -41,8 +42,7 @@ int main(int argc, char **argv) {
     pgm_set_world_terrain();
 
     log("adding units");
-    for (int i = 0; i < HUMAN_COUNT; i++) new Human();
-    for (int i = 0; i < LANDER_COUNT; i++) new Lander();
+    unit_init_all();
 
     log("starting game");
     start_game(&argc, argv);

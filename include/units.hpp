@@ -114,6 +114,7 @@ class Lander : public Unit {
         ATTACKING,
         KILLED
     } State;
+    uint8 daze_counter=0;
 
     // Instance Variables ------------------------------------------------------
 

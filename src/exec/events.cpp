@@ -67,8 +67,18 @@ void unit_cycle() {
     _react();
 }
 
+void unit_init_all(){
+    for (int i = 0; i < HUMAN_COUNT; i++) new Human();
+    for (int i = 0; i < LANDER_COUNT; i++) new Lander();
+}
+
 void unit_rm_all() {
     for (long i = Unit::units.size(); i > 0; i--) {
         delete Unit::units[i - 1];  // remove in reverse to avoid read violation
     }
+}
+
+void unit_reset_all(){
+    unit_rm_all();
+    unit_init_all();
 }

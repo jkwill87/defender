@@ -38,8 +38,6 @@ Human::Human(Coordinate coordinate) :
 Human::Human() : Human(calc_random_coordinate()) {}
 
 Human::~Human() {
-    available = false;
-    state = KILLED;
     Lander *lander;
     for (auto unit: units) {
         lander = dynamic_cast<Lander *>(unit);

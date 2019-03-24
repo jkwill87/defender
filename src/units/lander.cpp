@@ -23,14 +23,14 @@ extern Laser lasers[];
 // Constructor Definition ------------------------------------------------------
 
 Lander::Lander(int x, int y, int z) : Unit(x, y, z, "lander") {
-    layout[{-2, -1, +0}] = COLOUR_GREEN;
-    layout[{+2, -1, +0}] = COLOUR_GREEN;
-    layout[{+0, -1, -2}] = COLOUR_GREEN;
-    layout[{+0, -1, +2}] = COLOUR_GREEN;
-    layout[{+0, +1, +0}] = COLOUR_GREEN;
-    layout[{-1, +1, +0}] = COLOUR_GREEN;
-    layout[{+1, +1, +0}] = COLOUR_GREEN;
-    layout[{+0, +2, +0}] = COLOUR_YELLOW;
+    layout[{-2, -2, +0}] = COLOUR_GREEN;
+    layout[{+2, -2, +0}] = COLOUR_GREEN;
+    layout[{+0, -2, -2}] = COLOUR_GREEN;
+    layout[{+0, -2, +2}] = COLOUR_GREEN;
+    layout[{+0, +0, +0}] = COLOUR_GREEN;
+    layout[{-1, +0, +0}] = COLOUR_GREEN;
+    layout[{+1, +0, +0}] = COLOUR_GREEN;
+    layout[{+0, +1, +0}] = COLOUR_YELLOW;
     origin.y = min(origin.y, (int) calc_min_y());
     new_search_path();
 }
@@ -102,7 +102,10 @@ void Lander::action_bounce_ground() {
     log("%s hitting ground", as_str.c_str());
     origin.y++;
     target.y += 5;
-    if (captive) captive->action_lift();
+    if (captive) {
+        captive->target.y += 5;
+        captive->action_drop();
+    }
     daze_counter=LANDER_SEARCH_RANGE*2;
 }
 
@@ -137,15 +140,15 @@ void Lander::action_escape() {
 void Lander::action_exit() {
     log("%s escaped with %s", as_str.c_str(), captive->as_str.c_str());
     captive->action_capture();
-    abandon_captive();
+    abandon_captive(false);
     state = ATTACKING;
-    layout[{-2, -1, +0}] = COLOUR_RED;
-    layout[{+2, -1, +0}] = COLOUR_RED;
-    layout[{+0, -1, -2}] = COLOUR_RED;
-    layout[{+0, -1, +2}] = COLOUR_RED;
-    layout[{+0, +1, +0}] = COLOUR_RED;
-    layout[{-1, +1, +0}] = COLOUR_RED;
-    layout[{+1, +1, +0}] = COLOUR_RED;
+    layout[{-2, -2, +0}] = COLOUR_RED;
+    layout[{+2, -2, +0}] = COLOUR_RED;
+    layout[{+0, -2, -2}] = COLOUR_RED;
+    layout[{+0, -2, +2}] = COLOUR_RED;
+    layout[{+0, +0, +0}] = COLOUR_RED;
+    layout[{-1, +0, +0}] = COLOUR_RED;
+    layout[{+1, +0, +0}] = COLOUR_RED;
 }
 
 void Lander::action_attack() {
@@ -203,7 +206,7 @@ bool Lander::can_pursue(Human **rval) {
 }
 
 bool Lander::can_exit() {
-    return captive && WORLD_Y - origin.y < MAP_CLEAR * 2;
+    return captive && WORLD_Y - origin.y < MAP_CLEAR;
 }
 
 bool Lander::can_shoot_player() {
@@ -248,22 +251,21 @@ void Lander::ai() {
 void Lander::render() {
     Colour base = state == ATTACKING ? COLOUR_RED : COLOUR_GREEN;
     if (cycle % 2) {
-        layout[{+0, +0, +1}] = base;
-        layout[{+0, +0, -1}] = base;
-        layout[{-1, +0, +0}] = COLOUR_YELLOW;
-        layout[{+1, +0, +0}] = COLOUR_YELLOW;
+        layout[{+0, -1, +1}] = base;
+        layout[{+0, -1, -1}] = base;
+        layout[{-1, -1, +0}] = COLOUR_YELLOW;
+        layout[{+1, -1, +0}] = COLOUR_YELLOW;
     } else {
-        layout[{+0, +0, +1}] = COLOUR_YELLOW;
-        layout[{+0, +0, -1}] = COLOUR_YELLOW;
-        layout[{-1, +0, +0}] = base;
-        layout[{+1, +0, +0}] = base;
+        layout[{+0, -1, +1}] = COLOUR_YELLOW;
+        layout[{+0, -1, -1}] = COLOUR_YELLOW;
+        layout[{-1, -1, +0}] = base;
+        layout[{+1, -1, +0}] = base;
     }
     Unit::render();
 }
 
-void Lander::abandon_captive() {
-    if(captive) {
-        captive->action_drop();
-        captive = nullptr;
-    }
+void Lander::abandon_captive(bool drop) {
+    if (!captive) return;
+    if (drop) captive->action_drop();
+    captive = nullptr;
 }

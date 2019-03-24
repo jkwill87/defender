@@ -42,3 +42,5 @@ Running
 
 - Run "make" in the project top directory (where this file lives).
 - Run ./a4 (or the symlinked ./a1) to start.
+- Tested on MacOS Mojave.
+	

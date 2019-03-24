@@ -47,7 +47,8 @@ Unit::Unit(int x, int y, int z, string name) :
     is_colliding_unit(false),
     target({x, max(y, WORLD_Y - MAP_CLEAR), z}),
     origin(target),
-    as_str(name + " #" + to_string(units.size())) {
+    as_str(name + " #" + to_string(units.size()))
+{
     units.push_back(this);
     assert_gte(x, 0, "x out of bounds");
     assert_gte(y, 0, "y out of bounds");
@@ -154,11 +155,11 @@ Unit *Unit::find_unit(Coordinate coordinate) {
 void Unit::ai() {
     if (config.pause_units) return;
     target.x = max(target.x, MAP_CLEAR);
-    target.x = min(target.x, WORLD_XZ - MAP_CLEAR);
+    target.x = min(target.x, WORLD_XZ - 1);
     target.y = max(target.y, MAP_CLEAR);
-    target.y = min(target.y, WORLD_Y - MAP_CLEAR);
+    target.y = min(target.y, WORLD_Y - 1);
     target.z = max(target.z, MAP_CLEAR);
-    target.z = min(target.z, WORLD_XZ - MAP_CLEAR);
+    target.z = min(target.z, WORLD_XZ - 1);
     if (origin.x - target.x < 0) origin.x++;
     else if (origin.x - target.x > 0) origin.x--;
     if (origin.y - target.y < 0) origin.y++;

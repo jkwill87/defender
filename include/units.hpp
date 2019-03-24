@@ -22,10 +22,10 @@ class Unit {
     const long id;
     bool is_colliding_ground;
     bool is_colliding_unit;
-    Coordinate target;
     Layout layout;
 
     public:
+    Coordinate target;
     Coordinate origin;
     static std::vector<Unit *> units;
     static uint8 cycle;
@@ -158,7 +158,7 @@ class Lander : public Unit {
     bool can_shoot_player();
 
     public:
-    void abandon_captive();
+    void abandon_captive(bool drop=false);
     void ai() override;
     void render() override;
 };

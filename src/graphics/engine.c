@@ -1,15 +1,6 @@
-/**
- * engine.c
- *
- * A refactoring and customization of cis4820's starting OpenGL rendering code.
- */
-
 #include <math.h>
 #include "debug.h"
 #include "graphics.h"
-
-
-// External Variable Declarations ----------------------------------------------
 
 extern Config config;
 extern GlutHooks glut_hooks;
@@ -19,15 +10,9 @@ extern View view;
 extern World world_terrain;
 extern World world_units;
 
-
-// Static Variable Declarations ------------------------------------------------
-
 static float f[6][4];
 static int display_list[MAX_CUBES][3];
 static Material viewpoint_light = {-50.0f, -50.0f, -50.0f, 1.0};
-
-
-// Static Function Definitions -------------------------------------------------
 
 static void _draw_cube(World *world, int x, int y, int z) {
     Colour colour = (*world)[x][y][z];
@@ -140,8 +125,6 @@ static void _draw_laser(Laser *laser, Colour colour) {
     glPopMatrix();
     gluDeleteQuadric(quadric);
 }
-
-// Function Definitions --------------------------------------------------------
 
 void start_game(int *argc, char **argv) {
     // exec display

@@ -1,9 +1,3 @@
-/**
- * pgm.c
- *
- * Logic for parsing and transforming map data from PGM files.
- */
-
 #include <ctype.h>
 #include <time.h>
 #include <unistd.h>
@@ -11,21 +5,12 @@
 
 #define _PATH_BUFFER 100
 
-
-// External Variables ----------------------------------------------------------
-
 extern Pgm terrain;
 extern World world_terrain;
-
-
-// Module globals --------------------------------------------------------------
 
 static char *current_char;
 static char *last_char;
 static char pgm_path[_PATH_BUFFER] = {'\0'};
-
-
-// Private Function Definitions ------------------------------------------------
 
 bool _check_path(const char *prefix, const char *file_name) {
     snprintf(pgm_path, _PATH_BUFFER, "%s%s", prefix, file_name);
@@ -202,8 +187,6 @@ static void _cull_overlapping_cubes() {
         }
     }
 }
-
-// Public Function Definitions -------------------------------------------------
 
 void pgm_init(const char *filename) {
     // load file

@@ -1,8 +1,6 @@
 #pragma once
 
-// Constant Definitions --------------------------------------------------------
-
-// Configurable...
+// Configurable
 #define GAME_SPEED 2
 #define HUMAN_COUNT 4
 #define LANDER_ATTACK_RANGE 14
@@ -12,7 +10,7 @@
 #define WORLD_XZ 100
 #define WORLD_Y 50
 
-// Not so much...
+// Non-configurable
 #define MAP_CLEAR 5
 #define MAX_CUBES 500000
 #define PGM_MAX_DIGITS 10

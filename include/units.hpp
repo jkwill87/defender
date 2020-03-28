@@ -6,17 +6,10 @@
 #include <vector>
 #include "types.h"
 
-
-// Unit Abstract Base Class Declaration ========================================
-
 class Unit {
-    // Type Declarations -------------------------------------------------------
-
     protected:
     typedef std::array<int, 3> PositionArray;
     typedef std::map<PositionArray, Colour> Layout;
-
-    // Instance Variables ------------------------------------------------------
 
     protected:
     const long id;
@@ -31,13 +24,9 @@ class Unit {
     static uint8 cycle;
     const std::string as_str;
 
-    // Constructor Declarations ------------------------------------------------
-
     public:
     Unit(int x, int y, int z, std::string name);
     virtual ~Unit();
-
-    // Method Declarations  ----------------------------------------------------
 
     protected:
     static uint8 calc_min_y();
@@ -56,12 +45,7 @@ class Unit {
     bool is_occupying(Coordinate &pos);
 };
 
-
-// Human Class Declaration =====================================================
-
 class Human : public Unit {
-    // Type Declarations -------------------------------------------------------
-
     private:
     typedef enum : uint8 {
         SETTLED = 0,
@@ -69,8 +53,6 @@ class Human : public Unit {
         FLOATING,
         KILLED
     } State;
-
-    // Instance Variables ------------------------------------------------------
 
     private:
     State state = SETTLED;
@@ -80,15 +62,11 @@ class Human : public Unit {
     public:
     bool available = true;
 
-    // Constructor Declarations ------------------------------------------------
-
     public:
     Human(int x, int y, int z);
     explicit Human(Coordinate coordinate);
     explicit Human();
     ~Human() override;
-
-    // Method Declarations  ----------------------------------------------------
 
     public:
     void ai() override;
@@ -98,12 +76,7 @@ class Human : public Unit {
     void action_capture();
 };
 
-
-// Lander Class Declarations ===================================================
-
 class Lander : public Unit {
-    // Type Declarations -------------------------------------------------------
-
     private:
     typedef enum : uint8 {
         SEARCHING = 0,
@@ -116,23 +89,17 @@ class Lander : public Unit {
     } State;
     uint8 daze_counter=0;
 
-    // Instance Variables ------------------------------------------------------
-
     private:
     State state = SEARCHING;
 
     public:
     Human *captive = nullptr;
 
-    // Constructor Declarations ------------------------------------------------
-
     public:
     Lander(int x, int y, int z);
     explicit Lander(Coordinate coordinate);
     explicit Lander();
     ~Lander() override;
-
-    // Method Declarations  ----------------------------------------------------
 
     private:
     void set_captive(Human *);

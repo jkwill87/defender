@@ -1,9 +1,3 @@
-/**
- * lander.cpp
- *
- * Lander class derived from the Unit base class.
- */
-
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -12,15 +6,10 @@
 
 using namespace std;
 
-
-// External Variable Declarations ----------------------------------------------
-
 extern World world_terrain;
 extern World world_units;
 extern Position player_pos;
 extern Laser lasers[];
-
-// Constructor Definition ------------------------------------------------------
 
 Lander::Lander(int x, int y, int z) : Unit(x, y, z, "lander") {
     layout[{-2, -2, +0}] = COLOUR_GREEN;
@@ -46,9 +35,6 @@ Lander::~Lander() {
     if (captive) captive->action_drop();
     lasers[id].active = false;
 }
-
-
-// Private Method Definitions --------------------------------------------------
 
 void Lander::new_search_path() {
     log("%s searching elsewhere", as_str.c_str());
@@ -213,9 +199,6 @@ bool Lander::can_shoot_player() {
     return abs(origin.x + player_pos.x) < LANDER_ATTACK_RANGE &&
            abs(origin.z + player_pos.z) < LANDER_ATTACK_RANGE;
 }
-
-
-// Public Method Definitions ---------------------------------------------------
 
 void Lander::ai() {
     decide_next();

@@ -12,16 +12,10 @@
 
 using namespace std;
 
-
-// External Variable Declarations ----------------------------------------------
-
 extern Laser lasers[];
 extern Position player_pos;
 extern View view;
 extern World world_units;
-
-
-// Static Function Definitions 0------------------------------------------------
 
 static void _render() {
     memset(world_units, 0, WORLD_XZ * WORLD_XZ * WORLD_Y);
@@ -56,9 +50,6 @@ static void _react() {
         Unit::units[i - 1]->ai();
     }
 }
-
-
-// Function Definitions --------------------------------------------------------
 
 void unit_cycle() {
     ++Unit::cycle;

@@ -6,9 +6,6 @@
 
 #include "graphics.h"
 
-
-// Default Global State Definitions --------------------------------------------
-
 Config config = {
     .display_all_cubes = false,
     .fly_control = false,

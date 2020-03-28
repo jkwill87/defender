@@ -4,15 +4,9 @@
 #include <stdbool.h>
 #include "definitions.h"
 
-
-// Type Declarations -----------------------------------------------------------
-
 typedef uint_fast8_t uint8;
 typedef uint8 World[WORLD_XZ][WORLD_Y][WORLD_XZ];
 typedef float Material[4];
-
-
-// Type Definitions ------------------------------------------------------------
 
 typedef enum colour {
     COLOUR_NONE = 0,

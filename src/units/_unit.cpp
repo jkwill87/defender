@@ -1,10 +1,3 @@
-/**
- * _unit.cpp
- *
- * The base unit class.
- */
-
-
 #include <algorithm>
 #include <iostream>
 #include <random>
@@ -13,14 +6,9 @@
 
 using namespace std;
 
-
-// External Variable Declarations ----------------------------------------------
-
 extern World world_terrain;
 extern World world_units;
 extern Config config;
-
-// Static Function Definitions -------------------------------------------------
 
 static uint8 _gen_random(int min, int max) {
     static random_device rd;
@@ -32,14 +20,8 @@ static uint8 _gen_random(int min, int max) {
     return static_cast<uint8>(result);
 }
 
-
-// Static Variable Definitions -------------------------------------------------
-
 vector<Unit *> Unit::units;
 uint8 Unit::cycle = 0;
-
-
-// Constructor Definitions -----------------------------------------------------
 
 Unit::Unit(int x, int y, int z, string name) :
     id(units.size() + 1),
@@ -68,9 +50,6 @@ Unit::~Unit() {
         assert_ok(false, "could not unregister unit");
     }
 }
-
-
-// Protected Method Definitions ------------------------------------------------
 
 uint8 Unit::calc_min_y(int x, int z) {
     static int minimums[WORLD_XZ][WORLD_XZ] = {{-1}};
@@ -139,9 +118,6 @@ int Unit::y_distance(const Unit *target) {
     }
     return distance;
 }
-
-
-// Public Method Definitions ---------------------------------------------------
 
 Unit *Unit::find_unit(Coordinate coordinate) {
     for (Unit *unit: Unit::units) {

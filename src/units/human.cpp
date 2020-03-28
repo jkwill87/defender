@@ -1,22 +1,10 @@
-/**
- * human.cpp
- *
- * Human class derived from the Unit base class.
- */
-
 #include <iostream>
 #include "debug.h"
 #include "units.hpp"
 
 using namespace std;
 
-
-// External Variable Declarations ----------------------------------------------
-
 extern World world_terrain;
-
-
-// Constructor Definitions -----------------------------------------------------
 
 Human::Human(int x, int y, int z) : Unit(x, y, z, "human") {
     layout[{+0, -1, +0}] = COLOUR_GREEN;
@@ -46,9 +34,6 @@ Human::~Human() {
         }
     }
 }
-
-
-// Public Method Definitions ---------------------------------------------------
 
 void Human::ai() {
     switch (state) {

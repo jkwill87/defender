@@ -6,9 +6,6 @@
 extern "C" {
 #endif
 
-
-// Function Declarations -------------------------------------------------------
-
 void unit_cycle();
 void unit_init_all();
 void unit_rm_all();

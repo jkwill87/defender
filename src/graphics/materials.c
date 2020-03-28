@@ -1,9 +1,3 @@
-/**
- * materials.c
- *
- * Helper functions for retrieving OpenGL colour pairings.
- */
-
 #include "graphics.h"
 
 #define _m(m, r, b, g, a) m[0]=r;m[1]=b;m[2]=g;m[3]=a

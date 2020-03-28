@@ -1,15 +1,6 @@
-/**
- * map.c
- *
- * Logic for drawing 2d game map overlay.
- */
-
 #include <math.h>
 #include "debug.h"
 #include "graphics.h"
-
-
-// External Variable Declarations ----------------------------------------------
 
 extern Config config;
 extern Laser lasers[];
@@ -18,17 +9,11 @@ extern View view;
 extern World world_terrain;
 extern World world_units;
 
-
-// Static Variable Declarations ------------------------------------------------
-
 static float alpha;
 static float dim;
 static float pt;
 static int pt_nw_x, pt_nw_y;
 static int pt_se_x, pt_se_y;
-
-
-// Static Function Definitions -------------------------------------------------
 
 static void _set_2d_material(Material *material) {
     glMaterialfv(GL_FRONT, GL_EMISSION, *material);
@@ -39,9 +24,6 @@ static void _set_2d_colour(Colour colour, float alpha) {
     Material *material = get_material_a(colour, alpha);
     _set_2d_material(material);
 }
-
-
-// Function Definitions --------------------------------------------------------
 
 void map_pos_update() {
     dim = config.screen_width > config.screen_height ? config.screen_height

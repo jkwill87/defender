@@ -1,16 +1,7 @@
-/**
- * hooks.c
- *
- * Default GLUT hooks used by engine.
- */
-
 #include <math.h>
 #include "debug.h"
 #include "exec.h"
 #include "graphics.h"
-
-
-// External Variable Declarations ----------------------------------------------
 
 extern Config config;
 extern Laser lasers[];
@@ -23,9 +14,6 @@ static Coordinate pos_to_coord(Position pos) {
         (int) pos.x, (int) pos.y, (int) pos.z
     };
 }
-
-
-// Static Function Definitions -------------------------------------------------
 
 static bool _has_collided(Coordinate coord) {
     int x, y, z;
@@ -104,9 +92,6 @@ static void _calc_player_move(Direction direction) {
     // idle_update position if changed
     player_pos = player_pos_next;
 }
-
-
-// Hook Callback Definitions ---------------------------------------------------
 
 void glut_hook_default__draw_2d() {
     // note: layers overlay in the reverse order

@@ -1,22 +1,10 @@
-/**
- * main.cpp
- *
- * The game's entry point.
- */
-
 #include <string.h>
 #include "debug.h"
 #include "exec.h"
 #include "graphics.h"
 #include "units.hpp"
 
-
-// External Variable Declarations ----------------------------------------------
-
 extern Config config;
-
-
-// Program Entrypoint ----------------------------------------------------------
 
 int main(int argc, char **argv) {
     // Parse CLI arguments

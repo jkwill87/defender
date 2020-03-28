@@ -3,8 +3,11 @@
 .idea
 .vscode
 *build*
-a*
-CMake*
 cmake*
+CMake*
 compile_commands.json
+defender
 tags
+CMakeFiles
+Makefile
+cmake_install.cmake

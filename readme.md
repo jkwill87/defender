@@ -1,15 +1,10 @@
-Defender A4
-===========
+# Defender
 
-Author
-------
+Written in C and C++. A class project for CIS4820 at the University of Guelph.
 
-Name: Jessy Williams-Rancourt
-Email: jwilli19@uoguelph.ca
+![](assets/screenshot.png)
 
-
-Features Implemented
---------------------
+# Features Implemented
 
 1. Collision Between Pairs of Aliens
 Aliens bounce off each other whenever they move to occupy the same world space. This is done by normalizing their trajectory vectors. Landers enter a "dazed" state when this occurs and will abandon their current activity for a period of time proportionate to the velocity of the impact. As a result they may drop humans they were carrying or lose sight of humans they were persuing. 
@@ -20,11 +15,7 @@ While searching or attacking landers bounce between X/Z coordinates on adjacent 
 3. Alien Opponents
 When an alien successsfully exits with a human they change colour to red and begin to fire at the player. In this state their move patterns reverts to that of their searching behaviour. They will fire when within the "LANDER_ATTACK_RANGE" constant value as defined in definition.h.
 
-TLDR: Features 1-3 implemented
-
-
-Other Notes
------------
+# Gameplay Notes
 
 To help facilitate grading the following keypresses may be helpful:
 
@@ -36,11 +27,8 @@ To help facilitate grading the following keypresses may be helpful:
 
 Additionally see include/definition.h to tweak game parameters as desired.
 
+# Running
 
-Running
--------
-
-- Run "make" in the project top directory (where this file lives).
-- Run ./a4 (or the symlinked ./a1) to start.
-- Tested on MacOS Mojave.
-	
+- Run `cmake . && make` to build
+- Run `./defender` to run	
+- Tested on MacOS Catalina
